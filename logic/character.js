@@ -1,7 +1,8 @@
 export class Character {
     constructor() {
         this.stats = {
-            energy: 15,
+            max_energy: 20,
+            energy:20,
             health: 20,
             copper: 85,
             silver: 85,
@@ -10,8 +11,10 @@ export class Character {
             dexterity: 12,
             constitution: 12,
             intelligence: 12,
-            charisma: 18,
-            wisdom: 14
+            charisma: 12,
+            wisdom: 14,
+            food: 10,
+            drink: 10,
         };
     }
 

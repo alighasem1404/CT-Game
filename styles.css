@@ -80,6 +80,7 @@ header h1 {
 }
 
 /* Styling for each action button */
+.new-character button,
 .actions button {
     background: #7a5230;
     border: none;
@@ -94,7 +95,13 @@ header h1 {
     text-align: center;
 }
 
+
+.new-character button{
+    max-width: 250px;
+}
+
 /* Hover effect for action buttons */
+.new-character button:hover,
 .actions button:hover {
     background: #5a3c22;
 }

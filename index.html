@@ -24,6 +24,8 @@
     <ul class="stats">
         <li><span>Energy</span> <span id="energy-value">15</span></li>
         <li><span>Health</span> <span id="health-value">20</span></li>
+        <li><span>Food</span> <span id="food-value">10</span></li>
+        <li><span>Drink</span> <span id="drink-value">5</span></li>
         <li><hr style="border: 1px solid #777; width: 100%;"></li>
         <li><span>Copper</span> <span id="copper-value">85</span></li>
         <li><span>Silver</span> <span id="silver-value">85</span></li>
@@ -50,7 +52,13 @@
         <button id="character-sheet-button">Character Sheet</button>
     </div>
 </div>
-<div class="popup-container">
+
+<div class="new-character">
+    <button id="new-character-button">New Character</button>
+</div>
+
+
+<div class="popup-container" style="display: none;">
     <button id="special-actions-button" onclick="togglePopup()">Special Actions</button>
     <div id="popup-buttons" class="popup-buttons">
         <button id="forge-weapon-button">Forge Weapon</button>
@@ -58,7 +66,7 @@
     </div>
 </div>
 
-<div class="user-input">
+<div class="user-input" style="display: none;">
     <label for="custom-value">Enter a custom value:</label>
     <input type="text" id="custom-value" placeholder="Enter value">
     <button id="save-value">Save</button>
