@@ -1,7 +1,7 @@
 import { character } from "./mainCharacter.js";
 
 export function updateUI() {
-    // If the character has an occupation property, update its display.
+    // Update occupation display if available
     if ('occupation' in character) {
         const occupationEl = document.getElementById("occupation-value");
         if (occupationEl) {
@@ -12,9 +12,11 @@ export function updateUI() {
     // Shorthand for the character's stats
     const stats = character.stats;
     
-    // Update stat displays with the current values from character.stats
-    document.getElementById("energy-value").textContent = stats.energy;
-    document.getElementById("health-value").textContent = stats.health;
+    // Display energy as "energy/max_energy" and health as "health/max_health"
+    document.getElementById("energy-value").textContent = `${stats.energy}/${stats.max_energy}`;
+    document.getElementById("health-value").textContent = `${stats.health}/${stats.max_health}`;
+    
+    // Update other stats displays
     document.getElementById("food-value").textContent = stats.food;
     document.getElementById("drink-value").textContent = stats.drink;
     document.getElementById("copper-value").textContent = stats.copper;
