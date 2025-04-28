@@ -20,6 +20,7 @@ export function updateUI() {
     document.getElementById("copper-value").textContent = stats.copper;
     document.getElementById("silver-value").textContent = stats.silver;
     document.getElementById("gold-value").textContent = stats.gold;
+    document.getElementById("reputation-value").textContent = stats.reputation;
     document.getElementById("strength-value").textContent = stats.strength;
     document.getElementById("dexterity-value").textContent = stats.dexterity;
     document.getElementById("constitution-value").textContent = stats.constitution;

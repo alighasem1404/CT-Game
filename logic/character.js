@@ -2,7 +2,7 @@ export class Character {
     constructor() {
         this.stats = {
             max_energy: 20,
-            energy:20,
+            energy: 20,
             health: 20,
             copper: 85,
             silver: 85,
@@ -15,6 +15,7 @@ export class Character {
             wisdom: 14,
             food: 10,
             drink: 10,
+            reputation: 0  // added reputation stat with default value 0
         };
     }
 
