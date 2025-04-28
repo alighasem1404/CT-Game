@@ -1,0 +1,185 @@
+/* ------------------------ */
+/*      Global Styles       */
+/* ------------------------ */
+
+/* Body styling */
+body {
+    margin: 0;
+    font-family: 'Garamond', serif;
+    background: linear-gradient(to bottom, #2c2c2c, #1a1a1a);
+    color: #f5f5dc;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Header styling */
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 3em;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px #000;
+}
+
+/* ------------------------ */
+/*     Character Card       */
+/* ------------------------ */
+
+/* Main container for the character card */
+.character-card {
+    background: #3e3e3e;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+    width: 300px;
+    margin-bottom: 20px;
+}
+
+/* Title styling inside the character card */
+.character-card h2 {
+    margin-top: 0;
+    font-size: 1.8em;
+    border-bottom: 1px solid #777;
+    padding-bottom: 5px;
+}
+
+/* ------------------------ */
+/*        Stats List        */
+/* ------------------------ */
+
+/* Remove default list styling for stats */
+.stats {
+    list-style: none;
+    padding: 0;
+}
+
+/* Layout for individual stat items */
+.stats li {
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* ------------------------ */
+/*        Actions           */
+/* ------------------------ */
+
+/* Container for action buttons */
+.actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+    gap: 10px; /* Spacing between buttons */
+}
+
+/* Styling for each action button */
+.actions button {
+    background: #7a5230;
+    border: none;
+    padding: 10px 15px; /* Adjust padding for smaller buttons */
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.9em; /* Slightly smaller font size */
+    cursor: pointer;
+    transition: background 0.3s;
+    flex: 1 1 calc(33% - 20px); /* Ensure buttons fit within the card */
+    max-width: 100px; /* Limit button width */
+    text-align: center;
+}
+
+/* Hover effect for action buttons */
+.actions button:hover {
+    background: #5a3c22;
+}
+
+/* ------------------------ */
+/*       User Menus         */
+/* ------------------------ */
+
+/* Container for menus buttons */
+.user-menus {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around; /* Spread buttons evenly */
+    flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+    gap: 15px; /* Spacing between buttons */
+}
+
+/* Styling for each button in user menus */
+.user-menus button {
+    background: #5a3c22; /* Slightly darker background */
+    border: none;
+    padding: 12px 20px; /* Slightly larger padding */
+    border-radius: 10px; /* Slightly larger border radius */
+    color: #fff;
+    font-size: 1em; /* Slightly larger font size */
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s; /* Transform effect on hover */
+    max-width: 220px; /* Limit button width */
+    text-align: center;
+}
+
+/* Hover effect for user menus buttons */
+.user-menus button:hover {
+    background: #7a5230; /* Match the hover color of actions buttons */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+/* ------------------------ */
+/*      Popup Container     */
+/* ------------------------ */
+
+/* Container for popup elements */
+.popup-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Styling for the popup trigger button */
+.popup-container button {
+    background: #7a5230;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+/* Hover effect for popup trigger button */
+.popup-container button:hover {
+    background: #e69752;
+}
+
+/* ------------------------ */
+/*      Popup Buttons       */
+/* ------------------------ */
+
+/* Container for popup buttons layout */
+.popup-buttons {
+    position: absolute;
+    top: -80px;
+    left: 140%;
+    transform: translateX(-50%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    background: #5a3c22;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+/* Margin between popup buttons */
+.popup-buttons button {
+    margin: 5px 0;
+}

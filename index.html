@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Life Sim</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+       
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Adventurer's Life</h1>
+</header>
+
+<div class="character-card">
+    <h2 id="character-name">Sir Thalion</h2>
+    <ul class="stats">
+        <li><span>Occupation</span> <span id="occupation-value">Knight</span></li>
+    </ul>
+    <hr style="border: 1px solid #777; width: 100%;">
+    <ul class="stats">
+        <li><span>Energy</span> <span id="energy-value">15</span></li>
+        <li><span>Health</span> <span id="health-value">20</span></li>
+        <li><hr style="border: 1px solid #777; width: 100%;"></li>
+        <li><span>Copper</span> <span id="copper-value">85</span></li>
+        <li><span>Silver</span> <span id="silver-value">85</span></li>
+        <li><span>Gold</span> <span id="gold-value">85</span></li>
+        <li><hr style="border: 1px solid #777; width: 100%;"></li>
+        <li><span>Strength</span> <span id="strength-value">15</span></li>
+        <li><span>Dexterity</span> <span id="dexterity-value">12</span></li>
+        <li><span>Constitution</span> <span id="constitution-value">12</span></li>
+        <li><span>Intelligence</span> <span id="intelligence-value">12</span></li>
+        <li><span>Charisma</span> <span id="charisma-value">18</span></li>
+        <li><span>Wisdom</span> <span id="wisdom-value">14</span></li>
+    </ul>
+    <div class="actions">
+        <button id="work-button">Work</button>
+        <button id="rest-button">Rest</button>
+        <button id="socialise-button">Socialise</button>
+        <button id="explore-button">Explore</button>
+        <button id="craft-button">Craft</button>
+        <button id="train-button">Train</button>
+    </div>
+    <div class="user-menus">
+        <button id="quest-button">Quest</button>
+        <button id="journal-button">Journal</button>
+        <button id="character-sheet-button">Character Sheet</button>
+    </div>
+</div>
+<div class="popup-container">
+    <button id="special-actions-button" onclick="togglePopup()">Special Actions</button>
+    <div id="popup-buttons" class="popup-buttons">
+        <button id="forge-weapon-button">Forge Weapon</button>
+        <button id="learn-spell-button">Learn Spell</button>
+    </div>
+</div>
+
+<div class="user-input">
+    <label for="custom-value">Enter a custom value:</label>
+    <input type="text" id="custom-value" placeholder="Enter value">
+    <button id="save-value">Save</button>
+</div>
+<p id="saved-value-display"></p>
+</div>
+
+<script type="module" src="./logic/app.js"></script>
+</body>
+</html>
