@@ -10,71 +10,131 @@
     </style>
 </head>
 <body>
+    <header>
+        <h1>Adventurer's Life</h1>
+        <nav>
+            <button id="dashboard-nav">Dashboard</button>
+            <button id="character-sheet-nav">Character Sheet</button>
+            <button id="inventory-nav">Inventory</button>
+            <button id="journal-nav">Journal</button>
+            <button id="quest-nav">Quest</button>
+            <button id="settings-nav">Settings</button>
+        </nav>
+    </header>
 
-<header>
-    <h1>Adventurer's Life</h1>
-</header>
-
-<div class="character-card">
-    <h2 id="character-name">Sir Thalion</h2>
-    <ul class="stats">
-        <li><span>Occupation</span> <span id="occupation-value">Knight</span></li>
-    </ul>
-    <hr style="border: 1px solid #777; width: 100%;">
-    <ul class="stats">
-        <li><span>Energy</span> <span id="energy-value">15</span></li>
-        <li><span>Health</span> <span id="health-value">20</span></li>
-        <li><span>Reputation</span> <span id="reputation-value">0</span></li>
-        <li><span>Food</span> <span id="food-value">10</span></li>
-        <li><span>Drink</span> <span id="drink-value">5</span></li>
-        <li><hr style="border: 1px solid #777; width: 100%;"></li>
-        <li><span>Copper</span> <span id="copper-value">85</span></li>
-        <li><span>Silver</span> <span id="silver-value">85</span></li>
-        <li><span>Gold</span> <span id="gold-value">85</span></li>
-        <li><hr style="border: 1px solid #777; width: 100%;"></li>
-        <li><span>Strength</span> <span id="strength-value">15</span></li>
-        <li><span>Dexterity</span> <span id="dexterity-value">12</span></li>
-        <li><span>Constitution</span> <span id="constitution-value">12</span></li>
-        <li><span>Intelligence</span> <span id="intelligence-value">12</span></li>
-        <li><span>Charisma</span> <span id="charisma-value">18</span></li>
-        <li><span>Wisdom</span> <span id="wisdom-value">14</span></li>
-    </ul>
-    <div class="actions">
-        <button id="work-button">Work</button>
-        <button id="rest-button">Rest</button>
-        <button id="socialise-button">Socialise</button>
-        <button id="explore-button">Explore</button>
-        <button id="craft-button">Craft</button>
-        <button id="train-button">Train</button>
+    <!-- Dashboard (Main View) -->
+    <div id="dashboard-view" class="view active-view">
+        <div class="character-card">
+            <h2 id="character-name">Sir Thalion</h2>
+            <ul class="stats">
+                <li><span>Occupation</span> <span id="occupation-value">Knight</span></li>
+            </ul>
+            <hr style="border: 1px solid #777; width: 100%;">
+            <ul class="stats">
+                <li><span>Energy</span> <span id="energy-value">15/20</span></li>
+                <li><span>Health</span> <span id="health-value">20/20</span></li>
+                <li><span>Reputation</span> <span id="reputation-value">0</span></li>
+                <li><span>Gold</span> <span id="gold-value">85</span></li>
+            </ul>
+            <div class="actions">
+                <button id="work-button">Work</button>
+                <button id="rest-button">Rest</button>
+                <button id="socialise-button">Socialise</button>
+                <button id="explore-button">Explore</button>
+                <button id="craft-button">Craft</button>
+                <button id="train-button">Train</button>
+            </div>
+        </div>
     </div>
-    <div class="user-menus">
-        <button id="quest-button">Quest</button>
-        <button id="journal-button">Journal</button>
-        <button id="character-sheet-button">Character Sheet</button>
+
+    <!-- Character Sheet View (Detailed stats) -->
+    <div id="character-sheet-view" class="view">
+        <div class="character-card">
+            <h2 id="character-name-detailed">Sir Thalion</h2>
+            <ul class="stats">
+                <li><span>Occupation</span> <span id="occupation-value-detailed">Knight</span></li>
+                <li><span>Energy</span> <span id="energy-detailed">15/20</span></li>
+                <li><span>Health</span> <span id="health-detailed">20/20</span></li>
+                <li><span>Reputation</span> <span id="reputation-detailed">0</span></li>
+                <li><span>Food</span> <span id="food-value-detailed">10</span></li>
+                <li><span>Drink</span> <span id="drink-value-detailed">5</span></li>
+                <li><span>Copper</span> <span id="copper-value-detailed">85</span></li>
+                <li><span>Silver</span> <span id="silver-value-detailed">85</span></li>
+                <li><span>Gold</span> <span id="gold-value-detailed">85</span></li>
+                <li><span>Strength</span> <span id="strength-value-detailed">15</span></li>
+                <li><span>Dexterity</span> <span id="dexterity-value-detailed">12</span></li>
+                <li><span>Constitution</span> <span id="constitution-value-detailed">12</span></li>
+                <li><span>Intelligence</span> <span id="intelligence-value-detailed">12</span></li>
+                <li><span>Charisma</span> <span id="charisma-value-detailed">18</span></li>
+                <li><span>Wisdom</span> <span id="wisdom-value-detailed">14</span></li>
+            </ul>
+        </div>
     </div>
-</div>
 
-<div class="new-character">
-    <button id="new-character-button">New Character</button>
-</div>
-
-
-<div class="popup-container" style="display: none;">
-    <button id="special-actions-button" onclick="togglePopup()">Special Actions</button>
-    <div id="popup-buttons" class="popup-buttons">
-        <button id="forge-weapon-button">Forge Weapon</button>
-        <button id="learn-spell-button">Learn Spell</button>
+    <!-- Inventory View -->
+    <div id="inventory-view" class="view">
+        <h2>Inventory</h2>
+        <div id="inventory-list">
+            <!-- Dynamic inventory items will be rendered here -->
+        </div>
     </div>
-</div>
 
-<div class="user-input" style="display: none;">
-    <label for="custom-value">Enter a custom value:</label>
-    <input type="text" id="custom-value" placeholder="Enter value">
-    <button id="save-value">Save</button>
-</div>
-<p id="saved-value-display"></p>
-</div>
+    <!-- Journal View -->
+    <div id="journal-view" class="view">
+        <h2>Journal</h2>
+        <div id="journal-content">
+            <!-- Journal entries (logs, narrative, quest notes) go here -->
+        </div>
+    </div>
 
-<script type="module" src="./logic/app.js"></script>
+    <!-- Quest View -->
+    <div id="quest-view" class="view">
+        <h2>Quest</h2>
+        <div id="quest-details">
+            <!-- Active and completed quest information -->
+        </div>
+    </div>
+
+    <!-- Settings View -->
+    <div id="settings-view" class="view">
+        <div class="character-card">
+            <h2>User Settings</h2>
+            <div class="settings-actions">
+                <button id="new-character-button" class="actions-button">New Character</button>
+                <!-- Additional settings controls can be added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup Container for Special Actions -->
+    <div class="popup-container" style="display: none;">
+        <button id="special-actions-button" onclick="togglePopup()">Special Actions</button>
+        <div id="popup-buttons" class="popup-buttons">
+            <button id="forge-weapon-button">Forge Weapon</button>
+            <button id="learn-spell-button">Learn Spell</button>
+        </div>
+    </div>
+
+    <!-- User Input Section (optional) -->
+    <div class="user-input" style="display: none;">
+        <label for="custom-value">Enter a custom value:</label>
+        <input type="text" id="custom-value" placeholder="Enter value">
+        <button id="save-value">Save</button>
+    </div>
+    <p id="saved-value-display"></p>
+
+    <script type="module" src="./logic/app.js"></script>
+    <script>
+        // Navigation functionality to toggle views
+        const views = ['dashboard', 'character-sheet', 'inventory', 'journal', 'quest', 'settings'];
+        views.forEach(view => {
+            document.getElementById(`${view}-nav`).addEventListener('click', () => {
+                views.forEach(v => {
+                    document.getElementById(`${v}-view`).classList.remove('active-view');
+                });
+                document.getElementById(`${view}-view`).classList.add('active-view');
+            });
+        });
+    </script>
 </body>
 </html>
