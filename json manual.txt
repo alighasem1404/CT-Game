@@ -1,0 +1,236 @@
+Short manual
+
+Thought for a couple of seconds
+
+
+**Instruction for AI to export JSON from the spreadsheet:**
+
+1. **map.json**
+
+   * Read **Locations** and **Routes** sheets.
+   * For each **Locations** row, emit:
+
+     ```json
+     "LocationID": {
+       "description": …,
+       "position": { type, district?, region? },
+       "routes": [ … ]
+     }
+     ```
+   * For each **Routes** row, append to `routes[]` an object
+
+     ```json
+     { "to": ToLocationID, "time": TravelTime,
+       "conditions": parseConditions(StatMin, FlagTrue, HasItem, CountMin)
+     }
+     ```
+
+2. **actions.json**
+
+   * Read **PrimaryActions**, **SecondaryActions**, **Variations** sheets.
+   * For each **PrimaryActions** row, emit into
+
+     ```json
+     locations[LocationID].actions[] = {
+       "primary": PrimaryKey,
+       "conditions": parseConditions(...),
+       "secondary": []
+     }
+     ```
+   * For each **SecondaryActions** row, find its `primary` entry and append to `secondary[]`:
+
+     ```json
+     { "name": SecondaryKey, "conditions": parseConditions(...), "variations": [] }
+     ```
+   * For each **Variations** row, find its `secondary` entry and append to `variations[]`:
+
+     ```json
+     { "name": VariationKey, "conditions": parseConditions(...) }
+     ```
+
+3. **parseConditions**
+
+   * **StatMin** `"STAT:V"` → `{ "stat_min": { "STAT": V } }`
+   * **FlagTrue** → `{ "flag_true": FlagTrue }`
+   * **HasItem** + **CountMin?** → `{ "has_item": HasItem, "count_min"?: CountMin }`
+
+Generate two clean JSON files accordingly.
+
+
+Detailed manual:
+
+
+Here’s a concise “user manual” for driving both **map.json** and **actions.json** from the single sheet schema:
+
+---
+
+## 1. Locations (map.json)
+
+Each row in the **Locations** sheet becomes one entry in your map.json under `"locations"`.
+
+* **LocationID** (string): unique key
+* **Description** (string): human‑readable blurb shown to the player
+* **Position.Type** (`"town"` | `"wilderness"`): determines ambient UI (e.g. town vs. overland)
+* **Position.District** (string, optional): finer grouping within a town
+* **Position.Region** (string, optional): biome or zone name
+
+**Example snippet**
+
+```json
+"blacksmith": {
+  "description": "A forge for crafting weapons.",
+  "position": {
+    "type": "town",
+    "district": "market"
+  },
+  "routes": [ … ]
+}
+```
+
+---
+
+## 2. Routes (map.json)
+
+Each row in **Routes** adds one object to `locations[LocationID].routes[]`.
+
+* **ToLocationID**: the neighbor’s LocationID
+* **TravelTime**: string like `"5m"` or `"1h"`
+* **StatMin** (`"STAT:threshold"`): requires that stat ≥ threshold
+* **FlagTrue** (string): requires a boolean flag to be true
+* **HasItem** (string): requires that item in inventory
+* **CountMin** (integer): if present, requires at least this many of `HasItem`
+
+**Example snippet**
+
+```json
+"routes": [
+  {
+    "to": "alleyway",
+    "time": "1m",
+    "conditions": [
+      { "stat_min": { "DEX": 8 } }
+    ]
+  }
+]
+```
+
+---
+
+## 3. PrimaryActions (actions.json)
+
+Rows here populate `actions.json` under `locations[LocationID].actions[]` as first‐level verbs.
+
+* **PrimaryKey**: action name (e.g. `"craft"`, `"work"`)
+* **StatMin**, **FlagTrue**, **HasItem**, **CountMin**: same implicit checks
+
+**Example snippet**
+
+```json
+{
+  "primary": "craft",
+  "conditions": [
+    { "stat_min": { "STR": 8 } },
+    { "has_item": "SmithsHammer" }
+  ],
+  "secondary": [ … ]
+}
+```
+
+---
+
+## 4. SecondaryActions (actions.json)
+
+Each row produces one entry in the previous action’s `secondary[]` array:
+
+* **SecondaryKey**: subgroup name (e.g. `"weapons"`, `"mining"`)
+* Conditions as above
+
+**Example snippet**
+
+```json
+{
+  "name": "weapons",
+  "conditions": [
+    { "stat_min": { "INT": 10 } }
+  ],
+  "variations": [ … ]
+}
+```
+
+---
+
+## 5. Variations (actions.json)
+
+Finally, each row here becomes one element of `…secondary[i].variations[]`:
+
+* **VariationKey**: the specific sub‐choice (e.g. `"sword"` or `"long_shift"`)
+* Conditions as above
+
+**Example snippet**
+
+```json
+{
+  "name": "sword",
+  "conditions": [
+    { "has_item": "SteelIngot", "count_min": 2 }
+  ]
+}
+```
+
+---
+
+### Putting it all together
+
+* **map.json** = combine **Locations** + **Routes** tabs.
+* **actions.json** = combine **PrimaryActions**, **SecondaryActions**, **Variations** tabs.
+
+Your sheet rows simply turn into JSON objects, grouping by `LocationID` → `primary` → `secondary` → `variation`. Parsing “STAT\:threshold” into `{stat_min:{…}}` (and similarly for flags/items) gives you a concise, maintainable schema for both world‑map and in‑location actions.
+
+
+
+Here’s a **condensed list** of useful condition types for your game:  
+
+### **Basic Conditions**  
+1. **`stat_min`** – Must have at least `{STAT: value}` (e.g., `STR: 10`).  
+2. **`stat_max`** – Must have at most `{STAT: value}`.  
+3. **`has_item`** – Must possess an item (e.g., `"ColdCoat"`).  
+4. **`missing_item`** – Must **not** have an item.  
+5. **`item_count`** – Needs X quantity of an item (e.g., `{ "Gold": 100 }`).  
+6. **`equipped_item`** – Must be wearing an item.  
+
+### **Quest & Story**  
+7. **`quest_completed`** – Must finish a quest.  
+8. **`quest_started`** – Must start (but not complete) a quest.  
+9. **`event_triggered`** – Checks if a world event happened.  
+
+### **Faction & NPCs**  
+10. **`faction_standing`** – Minimum reputation (e.g., `{ "ThievesGuild": 50 }`).  
+11. **`has_companion`** – Must have a follower (e.g., `"Mage"`).  
+
+### **Time & World**  
+12. **`time_of_day`** – "night", "day", etc.  
+13. **`is_weather`** – "rain", "snow", etc.  
+14. **`is_area_visited`** – Player has been here before.  
+
+### **Player State**  
+15. **`has_status`** – Checks effects like "Poisoned".  
+16. **`is_class`** / **`is_race`** – Class/race restrictions.  
+
+### **Logic Operators**  
+17. **`AND`** – All sub-conditions must pass.  
+18. **`OR`** – At least one sub-condition must pass.  
+19. **`NOT`** – Inverts a condition.  
+
+---
+**Example Use:**  
+```json
+"conditions": [
+  { "OR": [
+    { "stat_min": { "STR": 12 } },
+    { "has_item": "Rope" }
+  ]},
+  { "NOT": { "has_status": "Exhausted" } }
+]
+```
+---
+This covers most common gameplay gates. Need adjustments for your system?
