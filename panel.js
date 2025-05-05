@@ -45,19 +45,29 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     // Initialize game data
     gameData.locations = {};
+    
+    // Add all locations from map.json
     const areas = mapData.map?.areas || {};
     Object.values(areas).forEach(area => {
       (area.locations || []).forEach(loc => {
-        gameData.locations[loc.id] = {
-          name: loc.id, // use id as display text
-          actions: actionsData.locations[loc.id]?.actions || []
+        const locationId = loc.id;
+        gameData.locations[locationId] = {
+          name: locationId,
+          actions: []
         };
       });
     });
     
-    setup(); 
-    renderTable();
+    // Add actions from actions.json
+    Object.entries(actionsData.locations || {}).forEach(([loc, locData]) => {
+      if (gameData.locations[loc]) {
+        gameData.locations[loc].actions = locData.actions || [];
+      }
+    });
+    
+    setup();
   } catch(e) { 
+    console.error('Error loading JSON:', e);
     alert('Error loading JSON: ' + e); 
   }
 });
@@ -80,7 +90,7 @@ function setup() {
   locationSelect.onchange = () => { 
     currentLoc = locationSelect.value; 
     cancelEdit(); 
-    renderTable(); 
+    loadLocationActions(currentLoc);
   };
   saveFileBtn.onclick = saveFile;
   addEntryBtn.onclick = onAddOrUpdate;
@@ -94,6 +104,9 @@ function setup() {
 
   // Setup result handlers
   setupResultHandlers(resultGroup);
+
+  // Load initial location actions
+  loadLocationActions(currentLoc);
 }
 
 async function saveFile() {
@@ -180,15 +193,43 @@ function renderTable() {
   allActionsTable.innerHTML = '';
   Object.entries(gameData.locations || {}).forEach(([loc, locData]) => {
     (locData.actions || []).forEach((act, ai) => {
-      act.secondary.forEach(sec => {
-        if (sec.variations.length) {
-          sec.variations.forEach((v, vi) => addRow(loc, ai, act, sec, v, vi));
-        } else {
-          addRow(loc, ai, act, sec, {name: '', conditions: []}, null);
-        }
-      });
+      if (!act.secondary || act.secondary.length === 0) {
+        // Add a row for primary action even if no secondary actions
+        addRow(loc, ai, act, {name: '', conditions: [], results: {}}, {name: '', conditions: [], results: {}}, null);
+      } else {
+        act.secondary.forEach(sec => {
+          if (sec.variations && sec.variations.length) {
+            sec.variations.forEach((v, vi) => {
+              // Ensure variation has results
+              if (!v.results) v.results = {};
+              addRow(loc, ai, act, sec, v, vi);
+            });
+          } else {
+            // Ensure secondary has results
+            if (!sec.results) sec.results = {};
+            addRow(loc, ai, act, sec, {name: '', conditions: [], results: {}}, null);
+          }
+        });
+      }
     });
   });
+}
+
+function formatResults(results) {
+  if (!results) return '-';
+  const parts = [];
+  if (results.ep_cost) parts.push(`EP: ${results.ep_cost}`);
+  if (results.stat_changes && Object.keys(results.stat_changes).length > 0) {
+    parts.push(`Stats: ${Object.entries(results.stat_changes).map(([stat, val]) => `${stat}+${val}`).join(', ')}`);
+  }
+  if (results.item_changes && results.item_changes.length > 0) {
+    parts.push(`Items: ${results.item_changes.map(ic => `${ic.item}${ic.count > 0 ? '+' : ''}${ic.count}`).join(', ')}`);
+  }
+  if (results.flag_changes && results.flag_changes.length > 0) {
+    parts.push(`Flags: ${results.flag_changes.map(fc => `${fc.flag}=${fc.state}`).join(', ')}`);
+  }
+  if (results.message) parts.push(`Msg: ${results.message}`);
+  return parts.join(' | ');
 }
 
 function addRow(loc, ai, act, sec, v, vi) {
@@ -197,10 +238,13 @@ function addRow(loc, ai, act, sec, v, vi) {
     <td>${loc}</td>
     <td>${act.primary}</td>
     <td>${formatConds(act.conditions || [])}</td>
+    <td class="result-cell">${formatResults(act.results)}</td>
     <td>${sec.name}</td>
     <td>${formatConds(sec.conditions || [])}</td>
+    <td class="result-cell">${formatResults(sec.results)}</td>
     <td>${v.name || '-'}</td>
     <td>${formatConds(v.conditions || [])}</td>
+    <td class="result-cell">${formatResults(v.results)}</td>
     <td>${act.base_ep_cost || 0}</td>
     <td>${act.event_deck || ''}</td>
     <td>
@@ -469,3 +513,96 @@ function setResultsInContainer(container, results) {
 // Make functions available globally
 window.onEdit = onEdit;
 window.removeEntry = removeEntry;
+
+function loadLocationActions(location) {
+  // Clear existing table
+  const tbody = allActionsTable.querySelector('tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  // Get actions for the selected location
+  const locationData = gameData.locations[location];
+  if (!locationData || !locationData.actions || locationData.actions.length === 0) {
+    return; // Empty table for locations with no actions
+  }
+
+  // Add rows for each action in the location
+  locationData.actions.forEach((act, ai) => {
+    // Ensure primary action has results
+    if (!act.results) act.results = {};
+    
+    if (!act.secondary || act.secondary.length === 0) {
+      // Add a row for primary action even if no secondary actions
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${location}</td>
+        <td>${act.primary}</td>
+        <td>${formatConds(act.conditions || [])}</td>
+        <td class="result-cell">${formatResults(act.results)}</td>
+        <td>-</td>
+        <td>-</td>
+        <td class="result-cell">-</td>
+        <td>-</td>
+        <td>-</td>
+        <td class="result-cell">-</td>
+        <td>${act.base_ep_cost || 0}</td>
+        <td>${act.event_deck || ''}</td>
+        <td>
+          <button onclick="onEdit('${location}',${ai},'',null)">✏️</button>
+          <button onclick="removeEntry('${location}',${ai}','',null)">🗑️</button>
+        </td>`;
+      tbody.appendChild(tr);
+    } else {
+      act.secondary.forEach(sec => {
+        // Ensure secondary action has results
+        if (!sec.results) sec.results = {};
+        
+        if (sec.variations && sec.variations.length) {
+          sec.variations.forEach((v, vi) => {
+            // Ensure variation has results
+            if (!v.results) v.results = {};
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${location}</td>
+              <td>${act.primary}</td>
+              <td>${formatConds(act.conditions || [])}</td>
+              <td class="result-cell">${formatResults(act.results)}</td>
+              <td>${sec.name}</td>
+              <td>${formatConds(sec.conditions || [])}</td>
+              <td class="result-cell">${formatResults(sec.results)}</td>
+              <td>${v.name}</td>
+              <td>${formatConds(v.conditions || [])}</td>
+              <td class="result-cell">${formatResults(v.results)}</td>
+              <td>${act.base_ep_cost || 0}</td>
+              <td>${act.event_deck || ''}</td>
+              <td>
+                <button onclick="onEdit('${location}',${ai},'${sec.name}',${vi})">✏️</button>
+                <button onclick="removeEntry('${location}',${ai}','${sec.name}',${vi})">🗑️</button>
+              </td>`;
+            tbody.appendChild(tr);
+          });
+        } else {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${location}</td>
+            <td>${act.primary}</td>
+            <td>${formatConds(act.conditions || [])}</td>
+            <td class="result-cell">${formatResults(act.results)}</td>
+            <td>${sec.name}</td>
+            <td>${formatConds(sec.conditions || [])}</td>
+            <td class="result-cell">${formatResults(sec.results)}</td>
+            <td>-</td>
+            <td>-</td>
+            <td class="result-cell">-</td>
+            <td>${act.base_ep_cost || 0}</td>
+            <td>${act.event_deck || ''}</td>
+            <td>
+              <button onclick="onEdit('${location}',${ai},'${sec.name}',null)">✏️</button>
+              <button onclick="removeEntry('${location}',${ai}','${sec.name}',null)">🗑️</button>
+            </td>`;
+          tbody.appendChild(tr);
+        }
+      });
+    }
+  });
+}

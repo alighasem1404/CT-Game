@@ -8,24 +8,68 @@
               { "stat_min": { "STR": 8 } },
               { "has_item": "SmithsHammer" }
             ],
+            "results": {
+              "ep_cost": 15,
+              "stat_changes": {
+                "strength": 1,
+                "crafting": 2
+              },
+              "item_changes": [],
+              "flag_changes": [],
+              "message": "You worked at the forge, improving your strength and crafting skills."
+            },
             "secondary": [
               {
                 "name": "weapons",
                 "conditions": [
                   { "stat_min": { "INT": 10 } }
                 ],
+                "results": {
+                  "ep_cost": 20,
+                  "stat_changes": {
+                    "crafting": 3,
+                    "intelligence": 1
+                  },
+                  "item_changes": [],
+                  "flag_changes": [],
+                  "message": "You crafted weapons, improving your crafting and intelligence."
+                },
                 "variations": [
                   {
                     "name": "sword",
                     "conditions": [
                       { "has_item": "SteelIngot", "count_min": 2 }
-                    ]
+                    ],
+                    "results": {
+                      "ep_cost": 25,
+                      "stat_changes": {
+                        "crafting": 4,
+                        "strength": 2
+                      },
+                      "item_changes": [
+                        { "item": "SteelSword", "count": 1 }
+                      ],
+                      "flag_changes": [],
+                      "message": "You forged a fine steel sword, improving your crafting and strength significantly."
+                    }
                   },
                   {
                     "name": "axe",
                     "conditions": [
                       { "has_item": "SteelIngot", "count_min": 3 }
-                    ]
+                    ],
+                    "results": {
+                      "ep_cost": 30,
+                      "stat_changes": {
+                        "crafting": 4,
+                        "strength": 3
+                      },
+                      "item_changes": [
+                        { "item": "SteelAxe", "count": 1 }
+                      ],
+                      "flag_changes": [],
+                      "message": "You crafted a sturdy steel axe, greatly improving your crafting and strength."
+                    }
                   }
                 ]
               },
@@ -34,18 +78,52 @@
                 "conditions": [
                   { "stat_min": { "DEX": 6 } }
                 ],
+                "results": {
+                  "ep_cost": 20,
+                  "stat_changes": {
+                    "crafting": 3,
+                    "dexterity": 1
+                  },
+                  "item_changes": [],
+                  "flag_changes": [],
+                  "message": "You worked on armor pieces, improving your crafting and dexterity."
+                },
                 "variations": [
                   {
                     "name": "helmet",
                     "conditions": [
                       { "has_item": "IronPlate", "count_min": 1 }
-                    ]
+                    ],
+                    "results": {
+                      "ep_cost": 25,
+                      "stat_changes": {
+                        "crafting": 4,
+                        "dexterity": 2
+                      },
+                      "item_changes": [
+                        { "item": "IronHelmet", "count": 1 }
+                      ],
+                      "flag_changes": [],
+                      "message": "You crafted a protective iron helmet, improving your crafting and dexterity significantly."
+                    }
                   },
                   {
                     "name": "gauntlets",
                     "conditions": [
                       { "has_item": "IronPlate", "count_min": 2 }
-                    ]
+                    ],
+                    "results": {
+                      "ep_cost": 30,
+                      "stat_changes": {
+                        "crafting": 4,
+                        "dexterity": 3
+                      },
+                      "item_changes": [
+                        { "item": "IronGauntlets", "count": 1 }
+                      ],
+                      "flag_changes": [],
+                      "message": "You forged a pair of iron gauntlets, greatly improving your crafting and dexterity."
+                    }
                   }
                 ]
               }
@@ -60,24 +138,74 @@
             "conditions": [
               { "stat_min": { "CON": 10 } }
             ],
+            "results": {
+              "ep_cost": 12,
+              "stat_changes": {
+                "strength": 1,
+                "endurance": 2
+              },
+              "item_changes": [
+                { "item": "IronOre", "count": 3 }
+              ],
+              "flag_changes": [],
+              "message": "You mined iron ore, improving your strength and endurance."
+            },
             "secondary": [
               {
                 "name": "mining",
                 "conditions": [],
+                "results": {
+                  "ep_cost": 15,
+                  "stat_changes": {
+                    "strength": 2,
+                    "endurance": 3
+                  },
+                  "item_changes": [
+                    { "item": "IronOre", "count": 5 }
+                  ],
+                  "flag_changes": [],
+                  "message": "You worked hard in the mine, improving your strength and endurance significantly."
+                },
                 "variations": [
                   {
                     "name": "long_shift",
                     "conditions": [
                       { "stat_min": { "STR": 12 } },
                       { "has_item": "MiningLantern" }
-                    ]
+                    ],
+                    "results": {
+                      "ep_cost": 20,
+                      "stat_changes": {
+                        "strength": 3,
+                        "endurance": 4
+                      },
+                      "item_changes": [
+                        { "item": "IronOre", "count": 8 }
+                      ],
+                      "flag_changes": [],
+                      "message": "You worked a long shift in the mine, greatly improving your strength and endurance."
+                    }
                   },
                   {
                     "name": "hazardous_depth",
                     "conditions": [
                       { "stat_min": { "DEX": 14 } },
                       { "flag_true": "completedSafetyTraining" }
-                    ]
+                    ],
+                    "results": {
+                      "ep_cost": 25,
+                      "stat_changes": {
+                        "strength": 4,
+                        "endurance": 5,
+                        "dexterity": 2
+                      },
+                      "item_changes": [
+                        { "item": "IronOre", "count": 12 },
+                        { "item": "RareGem", "count": 1 }
+                      ],
+                      "flag_changes": [],
+                      "message": "You mined in hazardous depths, finding rare gems and greatly improving your physical abilities."
+                    }
                   }
                 ]
               }
@@ -122,23 +250,85 @@
                           "charisma": 5
                         }
                       }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "tavern": {
+        "actions": [
+          {
+            "primary": "socialize",
+            "conditions": [],
+            "results": {
+              "ep_cost": 10,
+              "stat_changes": {
+                "charisma": 1,
+                "intelligence": 1
+              },
+              "item_changes": [],
+              "flag_changes": [],
+              "message": "You socialized with the locals, improving your charisma and learning some new information."
+            },
+            "secondary": [
+              {
+                "name": "gossip",
+                "conditions": [
+                  { "stat_min": { "CHA": 5 } }
+                ],
+                "results": {
+                  "ep_cost": 15,
+                  "stat_changes": {
+                    "charisma": 2,
+                    "intelligence": 2
+                  },
+                  "item_changes": [],
+                  "flag_changes": [],
+                  "message": "You gathered some interesting gossip from the locals, improving your social skills and knowledge."
+                },
+                "variations": [
+                  {
+                    "name": "merchant_gossip",
+                    "conditions": [
+                      { "has_item": "Ale" }
                     ],
                     "results": {
                       "ep_cost": 20,
                       "stat_changes": {
                         "charisma": 3,
-                        "gold": 10
+                        "intelligence": 3
                       },
                       "item_changes": [],
-                      "flag_changes": [],
-                      "message": "You impressed a wealthy merchant, earning some gold and improving your charisma significantly."
+                      "flag_changes": [
+                        { "flag": "knows_merchant_plans", "state": true }
+                      ],
+                      "message": "After sharing some ale, you learned valuable information about merchant caravans and trade routes."
+                    }
+                  },
+                  {
+                    "name": "adventurer_tales",
+                    "conditions": [
+                      { "has_item": "FineWine" }
+                    ],
+                    "results": {
+                      "ep_cost": 25,
+                      "stat_changes": {
+                        "charisma": 3,
+                        "intelligence": 4
+                      },
+                      "item_changes": [],
+                      "flag_changes": [
+                        { "flag": "knows_adventurer_rumors", "state": true }
+                      ],
+                      "message": "The adventurers shared tales of their exploits, giving you valuable insights into the world."
                     }
                   }
                 ]
               }
-            ],
-            "base_ep_cost": 10,
-            "event_deck": "market_events"
+            ]
           }
         ]
       }
