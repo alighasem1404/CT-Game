@@ -167,3 +167,34 @@ nav {
     margin-bottom: 20px;
     display: flex;
 }
+
+
+/* ------------------------ */
+/*       Image Styles        */
+/* ------------------------ */
+
+.location-img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: #000 solid 2px;
+}
+
+
+
+
+/* ------------------------ */
+/*       test area         */
+/* ------------------------ */
+
+.testArea {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    position: absolute;
+    top: 100px;
+    left: 10%;
+    transform: translateX(-50%);
+}
