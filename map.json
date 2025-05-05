@@ -1,0 +1,80 @@
+{
+  "map": {
+    "areas": {
+      "market": {
+        "description": "The trade hub full of shops and guilds.",
+        "connections": [
+          {
+            "to": "slums",
+            "conditions": [
+              { "stat_min": { "STR": 6 } }
+            ]
+          },
+          {
+            "to": "far_north",
+            "conditions": [
+              { "has_item": "ColdCoat" }
+            ]
+          }
+        ],
+        "locations": [
+          {
+            "id": "blacksmith",
+            "description": "A forge for crafting weapons."
+          },
+          {
+            "id": "tavern",
+            "description": "A cozy tavern where locals share news and drink."
+          },
+          {
+            "id": "main_square",
+            "description": "The central gathering place of the market district."
+          }
+        ]
+      },
+      "mine":{
+          "description": ""
+      },
+      "slums": {
+        "description": "The crowded, poorer quarter of town.",
+        "connections": [
+          {
+            "to": "market",
+            "conditions": [
+              { "stat_min": { "STR": 6 } }
+            ]
+          }
+        ],
+        "locations": [
+          
+          {
+            "id": "house",
+            "description": "A modest dwelling, its walls barely standing."
+          },
+          {
+            "id": "old_bridge",
+            "description": "A rickety wooden bridge spanning a narrow gutter."
+          },
+          {
+            "id": "bar",
+            "description": "A dingy bar where slum residents drown their sorrows."
+          }
+        ]
+      },
+      "far_north": {
+        "description": "The frozen wastes beyond the town.",
+        "connections": [
+          {
+            "to": "market",
+          }
+        ],
+        "locations": [
+          {
+            "id": "ice_fields",
+            "description": "Vast plains of ice and snow."
+          }
+        ]
+      }
+    }
+  }
+}

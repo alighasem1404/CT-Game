@@ -1,0 +1,90 @@
+{
+    "locations": {
+      "blacksmith": {
+        "actions": [
+          {
+            "primary": "craft",
+            "conditions": [
+              { "stat_min": { "STR": 8 } },
+              { "has_item": "SmithsHammer" }
+            ],
+            "secondary": [
+              {
+                "name": "weapons",
+                "conditions": [
+                  { "stat_min": { "INT": 10 } }
+                ],
+                "variations": [
+                  {
+                    "name": "sword",
+                    "conditions": [
+                      { "has_item": "SteelIngot", "count_min": 2 }
+                    ]
+                  },
+                  {
+                    "name": "axe",
+                    "conditions": [
+                      { "has_item": "SteelIngot", "count_min": 3 }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "armor",
+                "conditions": [
+                  { "stat_min": { "DEX": 6 } }
+                ],
+                "variations": [
+                  {
+                    "name": "helmet",
+                    "conditions": [
+                      { "has_item": "IronPlate", "count_min": 1 }
+                    ]
+                  },
+                  {
+                    "name": "gauntlets",
+                    "conditions": [
+                      { "has_item": "IronPlate", "count_min": 2 }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "iron_mine": {
+        "actions": [
+          {
+            "primary": "work",
+            "conditions": [
+              { "stat_min": { "CON": 10 } }
+            ],
+            "secondary": [
+              {
+                "name": "mining",
+                "conditions": [],
+                "variations": [
+                  {
+                    "name": "long_shift",
+                    "conditions": [
+                      { "stat_min": { "STR": 12 } },
+                      { "has_item": "MiningLantern" }
+                    ]
+                  },
+                  {
+                    "name": "hazardous_depth",
+                    "conditions": [
+                      { "stat_min": { "DEX": 14 } },
+                      { "flag_true": "completedSafetyTraining" }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+  
