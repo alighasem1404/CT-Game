@@ -84,6 +84,63 @@
             ]
           }
         ]
+      },
+      "market": {
+        "actions": [
+          {
+            "primary": "work",
+            "conditions": [],
+            "results": {
+              "ep_cost": 10,
+              "stat_changes": {
+                "strength": 1,
+                "endurance": 1
+              },
+              "item_changes": [],
+              "flag_changes": [],
+              "message": "You worked hard at the market, gaining some strength and endurance."
+            },
+            "secondary": [
+              {
+                "name": "merchant",
+                "conditions": [],
+                "results": {
+                  "ep_cost": 15,
+                  "stat_changes": {
+                    "charisma": 2
+                  },
+                  "item_changes": [],
+                  "flag_changes": [],
+                  "message": "You helped a merchant, improving your charisma."
+                },
+                "variations": [
+                  {
+                    "name": "rich_merchant",
+                    "conditions": [
+                      {
+                        "stat_min": {
+                          "charisma": 5
+                        }
+                      }
+                    ],
+                    "results": {
+                      "ep_cost": 20,
+                      "stat_changes": {
+                        "charisma": 3,
+                        "gold": 10
+                      },
+                      "item_changes": [],
+                      "flag_changes": [],
+                      "message": "You impressed a wealthy merchant, earning some gold and improving your charisma significantly."
+                    }
+                  }
+                ]
+              }
+            ],
+            "base_ep_cost": 10,
+            "event_deck": "market_events"
+          }
+        ]
       }
     }
   }
