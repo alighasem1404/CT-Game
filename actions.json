@@ -8,33 +8,27 @@
               { "stat_min": { "STR": 8 } },
               { "has_item": "SmithsHammer" }
             ],
-            "results": {
-              "ep_cost": 15,
-              "stat_changes": {
-                "strength": 1,
-                "crafting": 2
-              },
-              "item_changes": [],
-              "flag_changes": [],
-              "message": "You worked at the forge, improving your strength and crafting skills."
-            },
             "secondary": [
               {
                 "name": "weapons",
                 "conditions": [
                   { "stat_min": { "INT": 10 } }
                 ],
-                "results": {
-                  "ep_cost": 20,
-                  "stat_changes": {
-                    "crafting": 3,
-                    "intelligence": 1
-                  },
-                  "item_changes": [],
-                  "flag_changes": [],
-                  "message": "You crafted weapons, improving your crafting and intelligence."
-                },
                 "variations": [
+                  {
+                    "name": "basic",
+                    "conditions": [],
+                    "results": {
+                      "ep_cost": 15,
+                      "stat_changes": {
+                        "strength": 1,
+                        "crafting": 2
+                      },
+                      "item_changes": [],
+                      "flag_changes": [],
+                      "message": "You worked at the forge, improving your strength and crafting skills."
+                    }
+                  },
                   {
                     "name": "sword",
                     "conditions": [
@@ -78,17 +72,21 @@
                 "conditions": [
                   { "stat_min": { "DEX": 6 } }
                 ],
-                "results": {
-                  "ep_cost": 20,
-                  "stat_changes": {
-                    "crafting": 3,
-                    "dexterity": 1
-                  },
-                  "item_changes": [],
-                  "flag_changes": [],
-                  "message": "You worked on armor pieces, improving your crafting and dexterity."
-                },
                 "variations": [
+                  {
+                    "name": "basic",
+                    "conditions": [],
+                    "results": {
+                      "ep_cost": 20,
+                      "stat_changes": {
+                        "crafting": 3,
+                        "dexterity": 1
+                      },
+                      "item_changes": [],
+                      "flag_changes": [],
+                      "message": "You worked on armor pieces, improving your crafting and dexterity."
+                    }
+                  },
                   {
                     "name": "helmet",
                     "conditions": [
@@ -138,35 +136,27 @@
             "conditions": [
               { "stat_min": { "CON": 10 } }
             ],
-            "results": {
-              "ep_cost": 12,
-              "stat_changes": {
-                "strength": 1,
-                "endurance": 2
-              },
-              "item_changes": [
-                { "item": "IronOre", "count": 3 }
-              ],
-              "flag_changes": [],
-              "message": "You mined iron ore, improving your strength and endurance."
-            },
             "secondary": [
               {
                 "name": "mining",
                 "conditions": [],
-                "results": {
-                  "ep_cost": 15,
-                  "stat_changes": {
-                    "strength": 2,
-                    "endurance": 3
-                  },
-                  "item_changes": [
-                    { "item": "IronOre", "count": 5 }
-                  ],
-                  "flag_changes": [],
-                  "message": "You worked hard in the mine, improving your strength and endurance significantly."
-                },
                 "variations": [
+                  {
+                    "name": "basic",
+                    "conditions": [],
+                    "results": {
+                      "ep_cost": 12,
+                      "stat_changes": {
+                        "strength": 1,
+                        "endurance": 2
+                      },
+                      "item_changes": [
+                        { "item": "IronOre", "count": 3 }
+                      ],
+                      "flag_changes": [],
+                      "message": "You mined iron ore, improving your strength and endurance."
+                    }
+                  },
                   {
                     "name": "long_shift",
                     "conditions": [
@@ -218,30 +208,25 @@
           {
             "primary": "work",
             "conditions": [],
-            "results": {
-              "ep_cost": 10,
-              "stat_changes": {
-                "strength": 1,
-                "endurance": 1
-              },
-              "item_changes": [],
-              "flag_changes": [],
-              "message": "You worked hard at the market, gaining some strength and endurance."
-            },
             "secondary": [
               {
                 "name": "merchant",
                 "conditions": [],
-                "results": {
-                  "ep_cost": 15,
-                  "stat_changes": {
-                    "charisma": 2
-                  },
-                  "item_changes": [],
-                  "flag_changes": [],
-                  "message": "You helped a merchant, improving your charisma."
-                },
                 "variations": [
+                  {
+                    "name": "basic",
+                    "conditions": [],
+                    "results": {
+                      "ep_cost": 10,
+                      "stat_changes": {
+                        "strength": 1,
+                        "endurance": 1
+                      },
+                      "item_changes": [],
+                      "flag_changes": [],
+                      "message": "You worked hard at the market, gaining some strength and endurance."
+                    }
+                  },
                   {
                     "name": "rich_merchant",
                     "conditions": [
@@ -250,7 +235,16 @@
                           "charisma": 5
                         }
                       }
-                    ]
+                    ],
+                    "results": {
+                      "ep_cost": 15,
+                      "stat_changes": {
+                        "charisma": 2
+                      },
+                      "item_changes": [],
+                      "flag_changes": [],
+                      "message": "You helped a merchant, improving your charisma."
+                    }
                   }
                 ]
               }
@@ -263,33 +257,27 @@
           {
             "primary": "socialize",
             "conditions": [],
-            "results": {
-              "ep_cost": 10,
-              "stat_changes": {
-                "charisma": 1,
-                "intelligence": 1
-              },
-              "item_changes": [],
-              "flag_changes": [],
-              "message": "You socialized with the locals, improving your charisma and learning some new information."
-            },
             "secondary": [
               {
                 "name": "gossip",
                 "conditions": [
                   { "stat_min": { "CHA": 5 } }
                 ],
-                "results": {
-                  "ep_cost": 15,
-                  "stat_changes": {
-                    "charisma": 2,
-                    "intelligence": 2
-                  },
-                  "item_changes": [],
-                  "flag_changes": [],
-                  "message": "You gathered some interesting gossip from the locals, improving your social skills and knowledge."
-                },
                 "variations": [
+                  {
+                    "name": "basic",
+                    "conditions": [],
+                    "results": {
+                      "ep_cost": 10,
+                      "stat_changes": {
+                        "charisma": 1,
+                        "intelligence": 1
+                      },
+                      "item_changes": [],
+                      "flag_changes": [],
+                      "message": "You socialized with the locals, improving your charisma and learning some new information."
+                    }
+                  },
                   {
                     "name": "merchant_gossip",
                     "conditions": [

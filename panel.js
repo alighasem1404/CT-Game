@@ -89,7 +89,6 @@ function setup() {
   // Setup event listeners
   locationSelect.onchange = () => { 
     currentLoc = locationSelect.value; 
-    cancelEdit(); 
     loadLocationActions(currentLoc);
   };
   saveFileBtn.onclick = saveFile;
@@ -141,22 +140,54 @@ function onAddOrUpdate() {
       action.conditions = prConds;
       action.base_ep_cost = baseEP;
       action.event_deck = deck;
-      action.results = results;
+      
       const sec = action.secondary.find(s => s.name === oldSec);
       sec.name = secName;
       sec.conditions = secConds;
-      if (varIdx != null) sec.variations[varIdx] = {name: vName, conditions: vConds};
-      else if (vName) sec.variations.push({name: vName, conditions: vConds});
+      
+      if (varIdx != null) {
+        // Update variation
+        sec.variations[varIdx] = {
+          name: vName,
+          conditions: vConds,
+          results: results
+        };
+      } else if (vName) {
+        // Add new variation
+        sec.variations.push({
+          name: vName,
+          conditions: vConds,
+          results: results
+        });
+      } else {
+        // Update secondary action
+        sec.results = results;
+      }
     } else {
       const entry = {
         primary: pr,
         conditions: prConds,
-        secondary: [{name: secName, conditions: secConds, variations: []}],
+        secondary: [{
+          name: secName,
+          conditions: secConds,
+          variations: [],
+          results: {}
+        }],
         base_ep_cost: baseEP,
         event_deck: deck,
-        results
+        results: {}
       };
-      if (vName) entry.secondary[0].variations.push({name: vName, conditions: vConds});
+      
+      if (vName) {
+        entry.secondary[0].variations.push({
+          name: vName,
+          conditions: vConds,
+          results: results
+        });
+      } else {
+        entry.secondary[0].results = results;
+      }
+      
       (gameData.locations[currentLoc].actions || (gameData.locations[currentLoc].actions = [])).push(entry);
     }
     cancelEdit();
@@ -241,7 +272,6 @@ function addRow(loc, ai, act, sec, v, vi) {
     <td class="result-cell">${formatResults(act.results)}</td>
     <td>${sec.name}</td>
     <td>${formatConds(sec.conditions || [])}</td>
-    <td class="result-cell">${formatResults(sec.results)}</td>
     <td>${v.name || '-'}</td>
     <td>${formatConds(v.conditions || [])}</td>
     <td class="result-cell">${formatResults(v.results)}</td>
@@ -274,15 +304,17 @@ function onEdit(loc, ai, secName, vi) {
     newVariationName.value = sec.variations[vi].name;
     variationConditions.innerHTML = '';
     variationConditions.appendChild(ConditionSystem.createConditionUI(sec.variations[vi].conditions || []));
+    // Set results from variation
+    resultGroup.innerHTML = '';
+    setResultsInContainer(resultGroup, sec.variations[vi].results || {});
   } else {
     newVariationName.value = '';
     variationConditions.innerHTML = '';
     variationConditions.appendChild(ConditionSystem.createConditionUI());
+    // Set results from secondary action
+    resultGroup.innerHTML = '';
+    setResultsInContainer(resultGroup, sec.results || {});
   }
-  
-  // Set results
-  resultGroup.innerHTML = '';
-  setResultsInContainer(resultGroup, action.results || {});
   
   // Set other values
   newBaseEP.value = action.base_ep_cost;
@@ -528,9 +560,6 @@ function loadLocationActions(location) {
 
   // Add rows for each action in the location
   locationData.actions.forEach((act, ai) => {
-    // Ensure primary action has results
-    if (!act.results) act.results = {};
-    
     if (!act.secondary || act.secondary.length === 0) {
       // Add a row for primary action even if no secondary actions
       const tr = document.createElement('tr');
@@ -538,13 +567,11 @@ function loadLocationActions(location) {
         <td>${location}</td>
         <td>${act.primary}</td>
         <td>${formatConds(act.conditions || [])}</td>
-        <td class="result-cell">${formatResults(act.results)}</td>
         <td>-</td>
         <td>-</td>
-        <td class="result-cell">-</td>
         <td>-</td>
         <td>-</td>
-        <td class="result-cell">-</td>
+        <td>-</td>
         <td>${act.base_ep_cost || 0}</td>
         <td>${act.event_deck || ''}</td>
         <td>
@@ -554,22 +581,15 @@ function loadLocationActions(location) {
       tbody.appendChild(tr);
     } else {
       act.secondary.forEach(sec => {
-        // Ensure secondary action has results
-        if (!sec.results) sec.results = {};
-        
         if (sec.variations && sec.variations.length) {
           sec.variations.forEach((v, vi) => {
-            // Ensure variation has results
-            if (!v.results) v.results = {};
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td>${location}</td>
               <td>${act.primary}</td>
               <td>${formatConds(act.conditions || [])}</td>
-              <td class="result-cell">${formatResults(act.results)}</td>
               <td>${sec.name}</td>
               <td>${formatConds(sec.conditions || [])}</td>
-              <td class="result-cell">${formatResults(sec.results)}</td>
               <td>${v.name}</td>
               <td>${formatConds(v.conditions || [])}</td>
               <td class="result-cell">${formatResults(v.results)}</td>
@@ -587,13 +607,11 @@ function loadLocationActions(location) {
             <td>${location}</td>
             <td>${act.primary}</td>
             <td>${formatConds(act.conditions || [])}</td>
-            <td class="result-cell">${formatResults(act.results)}</td>
             <td>${sec.name}</td>
             <td>${formatConds(sec.conditions || [])}</td>
-            <td class="result-cell">${formatResults(sec.results)}</td>
             <td>-</td>
             <td>-</td>
-            <td class="result-cell">-</td>
+            <td>-</td>
             <td>${act.base_ep_cost || 0}</td>
             <td>${act.event_deck || ''}</td>
             <td>
