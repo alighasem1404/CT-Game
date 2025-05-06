@@ -1,0 +1,47 @@
+[
+  {
+    "subcategory": "Smithing",
+    "name": "Forge Iron Gauntlets",
+    "conditions": [
+      { "has_item": "IronPlate", "count_min": 2 }
+    ],
+    "results": [
+      { "ep_cost": 30 },
+      { "stat_increase": { "crafting": 4 } },
+      { "stat_increase": { "dexterity": 3 } },
+      { "add_item": { "item": "IronGauntlets", "count": 1 } },
+      { "message": "You forged a pair of iron gauntlets." }
+    ]
+  },
+  {
+    "subcategory": "Mining",
+    "name": "Hazardous Depth Mining",
+    "conditions": [
+      { "stat_min": { "DEX": 14 } },
+      { "flag_true": "completedSafetyTraining" }
+    ],
+    "results": [
+      { "ep_cost": 25 },
+      { "stat_increase": { "strength": 4 } },
+      { "stat_increase": { "endurance": 5 } },
+      { "stat_increase": { "dexterity": 2 } },
+      { "add_item": { "item": "IronOre", "count": 12 } },
+      { "add_item": { "item": "RareGem", "count": 1 } },
+      { "message": "You found rare gems while mining deep underground." }
+    ]
+  },
+  {
+    "subcategory": "Persuasion",
+    "name": "Gossip with Merchants",
+    "conditions": [
+      { "has_item": "Ale" }
+    ],
+    "results": [
+      { "ep_cost": 20 },
+      { "stat_increase": { "charisma": 3 } },
+      { "stat_increase": { "intelligence": 3 } },
+      { "set_flag": "knows_merchant_plans" },
+      { "message": "You learned merchant secrets over a drink." }
+    ]
+  }
+]

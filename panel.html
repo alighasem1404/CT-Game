@@ -2,226 +2,226 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Action Editor Panel</title>
-  <link rel="stylesheet" href="panelstyles.css">
- 
+  <title>Action Import & Editor Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #333; color: #eee; }
+    .panel, .action-list-container { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
+    .panel h2, .action-list-container h2 { margin-top: 0; }
+    .field-group { margin-bottom: 10px; }
+    .field-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+    select, input { width: 100%; padding: 5px; box-sizing: border-box; }
+    .conditions, .results { margin-top: 5px; }
+    .item-row { display: flex; align-items: center; margin-bottom: 5px; }
+    .item-row select, .item-row input { margin-right: 5px; }
+    .item-row button { margin-left: auto; }
+    #actionList { list-style: none; padding: 0; }
+    #actionList li { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+    button { padding: 5px 10px; }
+  </style>
 </head>
 <body>
-  <h1>Action Editor Panel</h1>
-  <button id="saveFile" disabled>💾 Save</button>
-  <label>Location:
-    <select id="locationSelect" disabled></select>
-  </label>
-  <section id="newEntryForm">
-    <h2 id="formTitle">Add New Action Entry</h2>
-    <div class="action-level">
-      <h3>Primary Action</h3>
-      <label>Primary:<select id="newPrimary"></select></label>
-      <div class="condition-group" id="primaryConditions">
-        <div class="condition-row">
-          <select class="condition-type">
-            <optgroup label="Basic Conditions">
-              <option value="stat_min">Stat Minimum</option>
-              <option value="stat_max">Stat Maximum</option>
-              <option value="has_item">Has Item</option>
-              <option value="missing_item">Missing Item</option>
-              <option value="item_count">Item Count</option>
-              <option value="equipped_item">Equipped Item</option>
-            </optgroup>
-            <optgroup label="Quest & Story">
-              <option value="quest_completed">Quest Completed</option>
-              <option value="quest_started">Quest Started</option>
-              <option value="event_triggered">Event Triggered</option>
-            </optgroup>
-            <optgroup label="Faction & NPCs">
-              <option value="faction_standing">Faction Standing</option>
-              <option value="has_companion">Has Companion</option>
-            </optgroup>
-            <optgroup label="Time & World">
-              <option value="time_of_day">Time of Day</option>
-              <option value="is_weather">Weather</option>
-              <option value="is_area_visited">Area Visited</option>
-            </optgroup>
-            <optgroup label="Player State">
-              <option value="has_status">Has Status</option>
-              <option value="is_class">Is Class</option>
-              <option value="is_race">Is Race</option>
-            </optgroup>
-          </select>
-          <input type="text" class="condition-value" placeholder="Value">
-          <button class="remove-condition">❌</button>
-        </div>
-        <div class="condition-relation">
-          <select class="relation-type">
-            <option value="and">AND</option>
-            <option value="or">OR</option>
-          </select>
-        </div>
-        <button class="add-condition-btn">➕ Add Condition</button>
-      </div>
-      
-
-    <div class="action-level">
-      <h3>Secondary Action</h3>
-      <label>Secondary Name:<input type="text" id="newSecondaryName"></label>
-      <div class="condition-group" id="secondaryConditions">
-        <div class="condition-row">
-          <select class="condition-type">
-            <optgroup label="Basic Conditions">
-              <option value="stat_min">Stat Minimum</option>
-              <option value="stat_max">Stat Maximum</option>
-              <option value="has_item">Has Item</option>
-              <option value="missing_item">Missing Item</option>
-              <option value="item_count">Item Count</option>
-              <option value="equipped_item">Equipped Item</option>
-            </optgroup>
-            <optgroup label="Quest & Story">
-              <option value="quest_completed">Quest Completed</option>
-              <option value="quest_started">Quest Started</option>
-              <option value="event_triggered">Event Triggered</option>
-            </optgroup>
-            <optgroup label="Faction & NPCs">
-              <option value="faction_standing">Faction Standing</option>
-              <option value="has_companion">Has Companion</option>
-            </optgroup>
-            <optgroup label="Time & World">
-              <option value="time_of_day">Time of Day</option>
-              <option value="is_weather">Weather</option>
-              <option value="is_area_visited">Area Visited</option>
-            </optgroup>
-            <optgroup label="Player State">
-              <option value="has_status">Has Status</option>
-              <option value="is_class">Is Class</option>
-              <option value="is_race">Is Race</option>
-            </optgroup>
-          </select>
-          <input type="text" class="condition-value" placeholder="Value">
-          <button class="remove-condition">❌</button>
-        </div>
-        <div class="condition-relation">
-          <select class="relation-type">
-            <option value="and">AND</option>
-            <option value="or">OR</option>
-          </select>
-        </div>
-        <button class="add-condition-btn">➕ Add Condition</button>
-      </div>
+  <h1>Action Creator & Editor</h1>
+  <input type="file" id="fileInput" accept="application/json" />
+  <div class="panel" id="editPanel">
+    <h2 id="panelTitle">New Action</h2>
+    <div class="field-group">
+      <label>Subcategory</label>
+      <select id="subSelect"></select>
     </div>
-
-    <div class="action-level">
-      <h3>Variation</h3>
-      <label>Variation Name:<input type="text" id="newVariationName"></label>
-      <div class="condition-group" id="variationConditions">
-        <div class="condition-row">
-          <select class="condition-type">
-            <optgroup label="Basic Conditions">
-              <option value="stat_min">Stat Minimum</option>
-              <option value="stat_max">Stat Maximum</option>
-              <option value="has_item">Has Item</option>
-              <option value="missing_item">Missing Item</option>
-              <option value="item_count">Item Count</option>
-              <option value="equipped_item">Equipped Item</option>
-            </optgroup>
-            <optgroup label="Quest & Story">
-              <option value="quest_completed">Quest Completed</option>
-              <option value="quest_started">Quest Started</option>
-              <option value="event_triggered">Event Triggered</option>
-            </optgroup>
-            <optgroup label="Faction & NPCs">
-              <option value="faction_standing">Faction Standing</option>
-              <option value="has_companion">Has Companion</option>
-            </optgroup>
-            <optgroup label="Time & World">
-              <option value="time_of_day">Time of Day</option>
-              <option value="is_weather">Weather</option>
-              <option value="is_area_visited">Area Visited</option>
-            </optgroup>
-            <optgroup label="Player State">
-              <option value="has_status">Has Status</option>
-              <option value="is_class">Is Class</option>
-              <option value="is_race">Is Race</option>
-            </optgroup>
-          </select>
-          <input type="text" class="condition-value" placeholder="Value">
-          <button class="remove-condition">❌</button>
-        </div>
-        <div class="condition-relation">
-          <select class="relation-type">
-            <option value="and">AND</option>
-            <option value="or">OR</option>
-          </select>
-        </div>
-        <button class="add-condition-btn">➕ Add Condition</button>
-      </div>
+    <div class="field-group">
+      <label>Name</label>
+      <input type="text" id="nameInput" />
     </div>
-
-    <div class="action-level">
-      <h3>Action Details</h3>
-      <label>Base EP Cost:<input type="number" id="newBaseEP" value="0"></label>
-      <label>Event Deck:<input type="text" id="newEventDeck"></label>
+    <div class="field-group">
+      <label>Conditions</label>
+      <div class="conditions" id="condsContainer"></div>
+      <button id="addCondBtn">+ Condition</button>
     </div>
-
-    <div class="action-level">
-      <h3>Results</h3>
-      <div class="result-group" id="resultGroup">
-        <div class="result-row">
-          <select class="result-type">
-            <optgroup label="Stat Changes">
-              <option value="stat_change">Stat Change</option>
-            </optgroup>
-            <optgroup label="Item Changes">
-              <option value="item_change">Item Change</option>
-            </optgroup>
-            <optgroup label="Flag Changes">
-              <option value="flag_change">Flag Change</option>
-            </optgroup>
-            <optgroup label="Other">
-              <option value="ep_cost">EP Cost</option>
-              <option value="message">Message</option>
-            </optgroup>
-          </select>
-          <input type="text" class="result-value" placeholder="Value">
-          <button class="remove-result">❌</button>
-        </div>
-        <div class="result-relation">
-          <select class="relation-type">
-            <option value="and">AND</option>
-            <option value="or">OR</option>
-          </select>
-        </div>
-        <button class="add-result-btn">➕ Add Result</button>
-      </div>
+    <div class="field-group">
+      <label>Results</label>
+      <div class="results" id="resContainer"></div>
+      <button id="addResBtn">+ Result</button>
     </div>
+    <button id="saveBtn">Save Action</button>
+    <button id="newBtn">New Action</button>
+  </div>
 
-    <div class="action-buttons">
-      <button id="addEntryBtn">➕ Add Entry</button>
-      <button id="cancelEditBtn" style="display:none;">✖ Cancel</button>
-    </div>
-  </section>
-  <h2>All Actions in JSON</h2>
-  <table id="allActionsTable">
-    <thead>
-      <tr>
-        <th>Location</th>
-        <th>Primary</th>
-        <th>Primary Conditions</th>
-        <th>Primary Results</th>
-        <th>Secondary</th>
-        <th>Secondary Conditions</th>
-        <th>Secondary Results</th>
-        <th>Variation</th>
-        <th>Variation Conditions</th>
-        <th>Variation Results</th>
-        <th>Base EP Cost</th>
-        <th>Event Deck</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <script type="module" src="panel.js"></script>
-  <style>
-    
-  </style>
+  <div class="action-list-container">
+    <h2>Loaded Actions</h2>
+    <ul id="actionList"></ul>
+  </div>
+
+  <button id="saveFileBtn">Save to File</button>
+
+  <script>
+    let loadedFilename = 'actions.json';
+    // Load categories from action_categories.json, fallback to default list
+    let catOptions = [];
+    fetch('action_categories.json')
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => {
+        if (Array.isArray(data)) catOptions = data;
+        else if (data.subcategories) catOptions = data.subcategories;
+        else catOptions = Object.keys(data);
+        initSubcategories();
+      })
+      .catch(() => {
+        catOptions = ['weapons','armor','mining','social','merchant','explore'];
+        initSubcategories();
+      });
+
+    // Attempt to load items.json if present
+    let itemsList = [];
+    fetch('items.json')
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => { itemsList = data.items || data; })
+      .catch(() => {});
+
+    const condTypes = ['stat_min','has_item','flag_true','flag_false'];
+    const resultTypes = ['ep_cost','stat_increase','add_item','set_flag','message'];
+
+    const subSelect = document.getElementById('subSelect');
+    const condsContainer = document.getElementById('condsContainer');
+    const resContainer = document.getElementById('resContainer');
+    const actionList = document.getElementById('actionList');
+    const nameInput = document.getElementById('nameInput');
+    const saveBtn = document.getElementById('saveBtn');
+    const newBtn = document.getElementById('newBtn');
+    const fileInput = document.getElementById('fileInput');
+    const saveFileBtn = document.getElementById('saveFileBtn');
+    const addCondBtn = document.getElementById('addCondBtn');
+    const addResBtn = document.getElementById('addResBtn');
+    const panelTitle = document.getElementById('panelTitle');
+
+    let actions = [];
+    let editIndex = -1;
+
+    function initSubcategories() {
+      subSelect.innerHTML = '';
+      catOptions.forEach(c => subSelect.add(new Option(c, c)));
+    }
+
+    function createKeyField(type, initialValue='') {
+      if ((type === 'has_item' || type === 'add_item') && itemsList.length) {
+        const select = document.createElement('select');
+        itemsList.forEach(item => select.add(new Option(item, item)));
+        select.value = initialValue;
+        return select;
+      } else {
+        const input = document.createElement('input');
+        input.placeholder = 'key';
+        input.value = initialValue;
+        return input;
+      }
+    }
+
+    function addCond() {
+      const row = document.createElement('div'); row.className = 'item-row';
+      const sel = document.createElement('select'); condTypes.forEach(t => sel.add(new Option(t,t)));
+      let keyField = createKeyField('', '');
+      const valI = document.createElement('input'); valI.placeholder = 'value';
+      const del = document.createElement('button'); del.textContent = '×'; del.onclick = () => row.remove();
+      sel.onchange = () => {
+        const newKey = createKeyField(sel.value, '');
+        row.replaceChild(newKey, keyField);
+        keyField = newKey;
+      };
+      row.append(sel, keyField, valI, del);
+      condsContainer.append(row);
+    }
+
+    function addRes() {
+      const row = document.createElement('div'); row.className = 'item-row';
+      const sel = document.createElement('select'); resultTypes.forEach(t => sel.add(new Option(t,t)));
+      let keyField = createKeyField('', '');
+      const valI = document.createElement('input'); valI.placeholder = 'value';
+      const del = document.createElement('button'); del.textContent = '×'; del.onclick = () => row.remove();
+      sel.onchange = () => {
+        const newKey = createKeyField(sel.value, '');
+        row.replaceChild(newKey, keyField);
+        keyField = newKey;
+      };
+      row.append(sel, keyField, valI, del);
+      resContainer.append(row);
+    }
+
+    function renderList() {
+      actionList.innerHTML = '';
+      actions.forEach((act, i) => {
+        const li = document.createElement('li');
+        li.textContent = `[${act.subcategory}] ${act.name}`;
+        const edit = document.createElement('button'); edit.textContent = 'Edit'; edit.onclick = () => loadAction(i);
+        const del = document.createElement('button'); del.textContent = 'Delete'; del.onclick = () => { actions.splice(i,1); renderList(); };
+        li.append(edit, del);
+        actionList.append(li);
+      });
+    }
+
+    function clearPanel() {
+      editIndex = -1;
+      panelTitle.textContent = 'New Action';
+      if (subSelect.options.length) subSelect.selectedIndex = 0;
+      nameInput.value = ''; condsContainer.innerHTML = ''; resContainer.innerHTML = '';
+    }
+
+    function loadAction(i) {
+      editIndex = i; panelTitle.textContent = `Edit Action ${i}`;
+      const a = actions[i]; subSelect.value = a.subcategory; nameInput.value = a.name;
+      condsContainer.innerHTML = ''; resContainer.innerHTML = '';
+      a.conditions.forEach(() => addCond());
+      a.results.forEach(() => addRes());
+    }
+
+    saveBtn.onclick = () => {
+      const sub = subSelect.value, name = nameInput.value;
+      const conds = [...condsContainer.querySelectorAll('.item-row')].map(r => {
+        const t = r.querySelector('select').value;
+        const k = r.querySelector('input:nth-of-type(1)').value;
+        const v = r.querySelector('input:nth-of-type(2)').value;
+        if (t==='stat_min') return { stat_min: { [k]:+v } };
+        if (t==='has_item') return { has_item:k,count_min:+v };
+        if (t==='flag_true') return { flag_true:k };
+        if (t==='flag_false') return { flag_false:k };
+      });
+      const res = [...resContainer.querySelectorAll('.item-row')].map(r => {
+        const t = r.querySelector('select').value;
+        const k = r.querySelector('input:nth-of-type(1)').value;
+        const v = r.querySelector('input:nth-of-type(2)').value;
+        if (t==='ep_cost') return { ep_cost:+v };
+        if (t==='stat_increase') return { stat_increase:{[k]:+v} };
+        if (t==='add_item') return { add_item:{item:k,count:+v} };
+        if (t==='set_flag') return { set_flag:k };
+        if (t==='message') return { message:v };
+      });
+      const obj = { subcategory:sub,name,conditions:conds,results:res };
+      editIndex<0 ? actions.push(obj) : actions[editIndex]=obj;
+      clearPanel(); renderList();
+    };
+
+    newBtn.onclick=clearPanel;
+
+    fileInput.onchange = () => {
+      const f=fileInput.files[0]; if(!f) return;
+      loadedFilename=f.name;
+      const r=new FileReader();
+      r.onload=e=>{
+        try{actions=JSON.parse(e.target.result);}catch{alert('Invalid JSON');return;}
+        clearPanel(); renderList();
+      };
+      r.readAsText(f);
+    };
+
+    saveFileBtn.onclick = () => {
+      const blob = new Blob([JSON.stringify(actions,null,2)],{type:'application/json'});
+      const a = document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download = loadedFilename || 'actions.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+
+    addCondBtn.onclick=addCond;
+    addResBtn.onclick=addRes;
+  </script>
 </body>
 </html>

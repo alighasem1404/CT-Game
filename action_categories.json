@@ -1,0 +1,9 @@
+{
+    "Combat": ["Melee", "Ranged", "Defense", "Tactics"],
+    "Social": ["Persuasion", "Deception", "Intimidation", "Negotiation"],
+    "Exploration": ["Movement", "Perception", "Navigation", "Investigation"],
+    "Crafting": ["Construction", "Alchemy", "Enchanting", "Smithing"],
+    "Magic": ["Elemental", "Necromancy", "Illusion", "Divination"],
+    "Utility": ["Stealth", "Thievery", "Tool Use", "Animal Handling"]
+  }
+  
