@@ -65,7 +65,7 @@
         "description": "The frozen wastes beyond the town.",
         "connections": [
           {
-            "to": "market",
+            "to": "market"
           }
         ],
         "locations": [
