@@ -16,12 +16,18 @@ export class Character {
             wisdom: 14,
             food: 10,
             drink: 10,
-            reputation: 0  // added reputation stat with default value 0
+            reputation: 0  
         };
 
         // Initialize inventory. This can be an object where keys are item names and values are their quantities.
         this.inventory = {
             // Example: "potion": 2
+        };
+        this.skills = {
+            // Example: "swordsmanship": 5
+            "swordsmanship": 5,
+            "archery": 3,
+            "magic": 4
         };
     }
 
@@ -59,6 +65,24 @@ export class Character {
             this.inventory[item] -= quantity;
             if (this.inventory[item] <= 0) {
                 delete this.inventory[item];
+            }
+        }
+    }
+    // Add an item to the skills
+    addToSkill(skill, quantity = 1) {
+        if (this.skills.hasOwnProperty(skill)) {
+            this.skills[skill] += quantity;
+        } else {
+            this.skills[skill] = quantity;
+        }
+    }
+
+    // Remove an item from the skill
+    removeFromSkill(skill, quantity = 1) {
+        if (this.skills.hasOwnProperty(skill)) {
+            this.skills[skill] -= quantity;
+            if (this.skills[skill] <= 0) {
+                delete this.skills[skill];
             }
         }
     }

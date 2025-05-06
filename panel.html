@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Action Editor Panel</title>
+  <link rel="stylesheet" href="panelstyles.css">
+ 
+</head>
+<body>
+  <h1>Action Editor Panel</h1>
+  <button id="saveFile" disabled>💾 Save</button>
+  <label>Location:
+    <select id="locationSelect" disabled></select>
+  </label>
+  <section id="newEntryForm">
+    <h2 id="formTitle">Add New Action Entry</h2>
+    <div class="action-level">
+      <h3>Primary Action</h3>
+      <label>Primary:<select id="newPrimary"></select></label>
+      <div class="condition-group" id="primaryConditions">
+        <div class="condition-row">
+          <select class="condition-type">
+            <optgroup label="Basic Conditions">
+              <option value="stat_min">Stat Minimum</option>
+              <option value="stat_max">Stat Maximum</option>
+              <option value="has_item">Has Item</option>
+              <option value="missing_item">Missing Item</option>
+              <option value="item_count">Item Count</option>
+              <option value="equipped_item">Equipped Item</option>
+            </optgroup>
+            <optgroup label="Quest & Story">
+              <option value="quest_completed">Quest Completed</option>
+              <option value="quest_started">Quest Started</option>
+              <option value="event_triggered">Event Triggered</option>
+            </optgroup>
+            <optgroup label="Faction & NPCs">
+              <option value="faction_standing">Faction Standing</option>
+              <option value="has_companion">Has Companion</option>
+            </optgroup>
+            <optgroup label="Time & World">
+              <option value="time_of_day">Time of Day</option>
+              <option value="is_weather">Weather</option>
+              <option value="is_area_visited">Area Visited</option>
+            </optgroup>
+            <optgroup label="Player State">
+              <option value="has_status">Has Status</option>
+              <option value="is_class">Is Class</option>
+              <option value="is_race">Is Race</option>
+            </optgroup>
+          </select>
+          <input type="text" class="condition-value" placeholder="Value">
+          <button class="remove-condition">❌</button>
+        </div>
+        <div class="condition-relation">
+          <select class="relation-type">
+            <option value="and">AND</option>
+            <option value="or">OR</option>
+          </select>
+        </div>
+        <button class="add-condition-btn">➕ Add Condition</button>
+      </div>
+      
+
+    <div class="action-level">
+      <h3>Secondary Action</h3>
+      <label>Secondary Name:<input type="text" id="newSecondaryName"></label>
+      <div class="condition-group" id="secondaryConditions">
+        <div class="condition-row">
+          <select class="condition-type">
+            <optgroup label="Basic Conditions">
+              <option value="stat_min">Stat Minimum</option>
+              <option value="stat_max">Stat Maximum</option>
+              <option value="has_item">Has Item</option>
+              <option value="missing_item">Missing Item</option>
+              <option value="item_count">Item Count</option>
+              <option value="equipped_item">Equipped Item</option>
+            </optgroup>
+            <optgroup label="Quest & Story">
+              <option value="quest_completed">Quest Completed</option>
+              <option value="quest_started">Quest Started</option>
+              <option value="event_triggered">Event Triggered</option>
+            </optgroup>
+            <optgroup label="Faction & NPCs">
+              <option value="faction_standing">Faction Standing</option>
+              <option value="has_companion">Has Companion</option>
+            </optgroup>
+            <optgroup label="Time & World">
+              <option value="time_of_day">Time of Day</option>
+              <option value="is_weather">Weather</option>
+              <option value="is_area_visited">Area Visited</option>
+            </optgroup>
+            <optgroup label="Player State">
+              <option value="has_status">Has Status</option>
+              <option value="is_class">Is Class</option>
+              <option value="is_race">Is Race</option>
+            </optgroup>
+          </select>
+          <input type="text" class="condition-value" placeholder="Value">
+          <button class="remove-condition">❌</button>
+        </div>
+        <div class="condition-relation">
+          <select class="relation-type">
+            <option value="and">AND</option>
+            <option value="or">OR</option>
+          </select>
+        </div>
+        <button class="add-condition-btn">➕ Add Condition</button>
+      </div>
+    </div>
+
+    <div class="action-level">
+      <h3>Variation</h3>
+      <label>Variation Name:<input type="text" id="newVariationName"></label>
+      <div class="condition-group" id="variationConditions">
+        <div class="condition-row">
+          <select class="condition-type">
+            <optgroup label="Basic Conditions">
+              <option value="stat_min">Stat Minimum</option>
+              <option value="stat_max">Stat Maximum</option>
+              <option value="has_item">Has Item</option>
+              <option value="missing_item">Missing Item</option>
+              <option value="item_count">Item Count</option>
+              <option value="equipped_item">Equipped Item</option>
+            </optgroup>
+            <optgroup label="Quest & Story">
+              <option value="quest_completed">Quest Completed</option>
+              <option value="quest_started">Quest Started</option>
+              <option value="event_triggered">Event Triggered</option>
+            </optgroup>
+            <optgroup label="Faction & NPCs">
+              <option value="faction_standing">Faction Standing</option>
+              <option value="has_companion">Has Companion</option>
+            </optgroup>
+            <optgroup label="Time & World">
+              <option value="time_of_day">Time of Day</option>
+              <option value="is_weather">Weather</option>
+              <option value="is_area_visited">Area Visited</option>
+            </optgroup>
+            <optgroup label="Player State">
+              <option value="has_status">Has Status</option>
+              <option value="is_class">Is Class</option>
+              <option value="is_race">Is Race</option>
+            </optgroup>
+          </select>
+          <input type="text" class="condition-value" placeholder="Value">
+          <button class="remove-condition">❌</button>
+        </div>
+        <div class="condition-relation">
+          <select class="relation-type">
+            <option value="and">AND</option>
+            <option value="or">OR</option>
+          </select>
+        </div>
+        <button class="add-condition-btn">➕ Add Condition</button>
+      </div>
+    </div>
+
+    <div class="action-level">
+      <h3>Action Details</h3>
+      <label>Base EP Cost:<input type="number" id="newBaseEP" value="0"></label>
+      <label>Event Deck:<input type="text" id="newEventDeck"></label>
+    </div>
+
+    <div class="action-level">
+      <h3>Results</h3>
+      <div class="result-group" id="resultGroup">
+        <div class="result-row">
+          <select class="result-type">
+            <optgroup label="Stat Changes">
+              <option value="stat_change">Stat Change</option>
+            </optgroup>
+            <optgroup label="Item Changes">
+              <option value="item_change">Item Change</option>
+            </optgroup>
+            <optgroup label="Flag Changes">
+              <option value="flag_change">Flag Change</option>
+            </optgroup>
+            <optgroup label="Other">
+              <option value="ep_cost">EP Cost</option>
+              <option value="message">Message</option>
+            </optgroup>
+          </select>
+          <input type="text" class="result-value" placeholder="Value">
+          <button class="remove-result">❌</button>
+        </div>
+        <div class="result-relation">
+          <select class="relation-type">
+            <option value="and">AND</option>
+            <option value="or">OR</option>
+          </select>
+        </div>
+        <button class="add-result-btn">➕ Add Result</button>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button id="addEntryBtn">➕ Add Entry</button>
+      <button id="cancelEditBtn" style="display:none;">✖ Cancel</button>
+    </div>
+  </section>
+  <h2>All Actions in JSON</h2>
+  <table id="allActionsTable">
+    <thead>
+      <tr>
+        <th>Location</th>
+        <th>Primary</th>
+        <th>Primary Conditions</th>
+        <th>Primary Results</th>
+        <th>Secondary</th>
+        <th>Secondary Conditions</th>
+        <th>Secondary Results</th>
+        <th>Variation</th>
+        <th>Variation Conditions</th>
+        <th>Variation Results</th>
+        <th>Base EP Cost</th>
+        <th>Event Deck</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script type="module" src="panel.js"></script>
+  <style>
+    
+  </style>
+</body>
+</html>

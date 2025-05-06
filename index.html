@@ -31,10 +31,24 @@
             </ul>
             <hr style="border: 1px solid #777; width: 100%;">
             <ul class="stats">
+                <li><span>Reputation</span> <span id="reputation-value">0</span></li>
                 <li><span>Energy</span> <span id="energy-value">15/20</span></li>
                 <li><span>Health</span> <span id="health-value">20/20</span></li>
-                <li><span>Reputation</span> <span id="reputation-value">0</span></li>
+                <li><span>Food</span> <span id="food-value">10</span></li>
+                <li><span>Drink</span> <span id="drink-value">5</span></li>
+                <hr style="border: 1px solid #777; width: 100%;">
                 <li><span>Gold</span> <span id="gold-value">85</span></li>
+                <li><span>Silver</span> <span id="silver-value">85</span></li>
+                <li><span>Copper</span> <span id="copper-value">85</span></li>
+                <hr style="border: 1px solid #777; width: 100%;">
+                <img class="location-img" id="location-img" src="assets\images\pic1.png" alt="Location">
+
+<script>
+  function swapImage() {
+    const img = document.getElementById('location-img');
+    img.src = img.src.endsWith('assets/images/pic1.png') ? 'assets/images/pic2.png' : img.src.endsWith('assets/images/pic2.png') ? 'assets/images/pic3.png' : 'assets/images/pic1.png';
+  }
+</script>
             </ul>
             <div class="actions">
                 <button id="work-button">Work</button>
@@ -44,29 +58,37 @@
                 <button id="craft-button">Craft</button>
                 <button id="train-button">Train</button>
             </div>
+                
         </div>
     </div>
-
+<div class="testArea">
+    <button onclick="swapImage()">Switch image</button>
+</div>
     <!-- Character Sheet View (Detailed stats) -->
     <div id="character-sheet-view" class="view">
         <div class="character-card">
-            <h2 id="character-name-detailed">Sir Thalion</h2>
+            <h2 id="character-name">Sir Thalion</h2>
             <ul class="stats">
-                <li><span>Occupation</span> <span id="occupation-value-detailed">Knight</span></li>
-                <li><span>Energy</span> <span id="energy-detailed">15/20</span></li>
-                <li><span>Health</span> <span id="health-detailed">20/20</span></li>
-                <li><span>Reputation</span> <span id="reputation-detailed">0</span></li>
-                <li><span>Food</span> <span id="food-value-detailed">10</span></li>
-                <li><span>Drink</span> <span id="drink-value-detailed">5</span></li>
-                <li><span>Copper</span> <span id="copper-value-detailed">85</span></li>
-                <li><span>Silver</span> <span id="silver-value-detailed">85</span></li>
-                <li><span>Gold</span> <span id="gold-value-detailed">85</span></li>
-                <li><span>Strength</span> <span id="strength-value-detailed">15</span></li>
-                <li><span>Dexterity</span> <span id="dexterity-value-detailed">12</span></li>
-                <li><span>Constitution</span> <span id="constitution-value-detailed">12</span></li>
-                <li><span>Intelligence</span> <span id="intelligence-value-detailed">12</span></li>
-                <li><span>Charisma</span> <span id="charisma-value-detailed">18</span></li>
-                <li><span>Wisdom</span> <span id="wisdom-value-detailed">14</span></li>
+                <li><span>Occupation</span> <span id="occupation-value">Knight</span></li>
+                <li><span>Energy</span> <span id="energy-value">15/20</span></li>
+                <li><span>Health</span> <span id="health-value">20/20</span></li>
+                <li><span>Reputation</span> <span id="reputation-value">0</span></li>
+                <li><span>Food</span> <span id="food-value">10</span></li>
+                <li><span>Drink</span> <span id="drink-value">5</span></li>
+                <hr style="border: 1px solid #777; width: 100%;">
+                <li><span>Copper</span> <span id="copper-value">85</span></li>
+                <li><span>Silver</span> <span id="silver-value">85</span></li>
+                <li><span>Gold</span> <span id="gold-value">85</span></li>
+                <hr style="border: 1px solid #777; width: 100%;">
+                <li><span>Strength</span> <span id="strength-value">15</span></li>
+                <li><span>Dexterity</span> <span id="dexterity-value">12</span></li>
+                <li><span>Constitution</span> <span id="constitution-value">12</span></li>
+                <li><span>Intelligence</span> <span id="intelligence-value">12</span></li>
+                <li><span>Charisma</span> <span id="charisma-value">18</span></li>
+                <li><span>Wisdom</span> <span id="wisdom-value">14</span></li>
+                <hr style="border: 1px solid #777; width: 100%;">
+                <h3 style="text-align: center;">Skills</h3>
+                <div id="skills-value"></div>
             </ul>
         </div>
     </div>

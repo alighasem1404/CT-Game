@@ -1,32 +1,40 @@
 import { character } from "./mainCharacter.js";
 
 export function updateUI() {
+    // Helper to set text on every element matching an ID selector
+    function setAllById(id, text) {
+      document.querySelectorAll(`#${id}`).forEach(el => {
+        el.innerHTML = text;
+      });
+    }
+  
     // Update occupation display if available
     if ('occupation' in character) {
-        const occupationEl = document.getElementById("occupation-value");
-        if (occupationEl) {
-            occupationEl.textContent = character.occupation;
-        }
+      setAllById('occupation-value', character.occupation);
     }
-    
-    // Shorthand for the character's stats
+  
     const stats = character.stats;
-    
-    // Display energy as "energy/max_energy" and health as "health/max_health"
-    document.getElementById("energy-value").textContent = `${stats.energy}/${stats.max_energy}`;
-    document.getElementById("health-value").textContent = `${stats.health}/${stats.max_health}`;
-    
-    // Update other stats displays
-    document.getElementById("food-value").textContent = stats.food;
-    document.getElementById("drink-value").textContent = stats.drink;
-    document.getElementById("copper-value").textContent = stats.copper;
-    document.getElementById("silver-value").textContent = stats.silver;
-    document.getElementById("gold-value").textContent = stats.gold;
-    document.getElementById("reputation-value").textContent = stats.reputation;
-    document.getElementById("strength-value").textContent = stats.strength;
-    document.getElementById("dexterity-value").textContent = stats.dexterity;
-    document.getElementById("constitution-value").textContent = stats.constitution;
-    document.getElementById("intelligence-value").textContent = stats.intelligence;
-    document.getElementById("charisma-value").textContent = stats.charisma;
-    document.getElementById("wisdom-value").textContent = stats.wisdom;
-}
+  
+    // Energy and health
+    setAllById('energy-value', `${stats.energy}/${stats.max_energy}`);
+    setAllById('health-value', `${stats.health}/${stats.max_health}`);
+  
+    // Other stats
+    setAllById('food-value', stats.food);
+    setAllById('drink-value', stats.drink);
+    setAllById('copper-value', stats.copper);
+    setAllById('silver-value', stats.silver);
+    setAllById('gold-value', stats.gold);
+    setAllById('reputation-value', stats.reputation);
+    setAllById('strength-value', stats.strength);
+    setAllById('dexterity-value', stats.dexterity);
+    setAllById('constitution-value', stats.constitution);
+    setAllById('intelligence-value', stats.intelligence);
+    setAllById('charisma-value', stats.charisma);
+    setAllById('wisdom-value', stats.wisdom);
+    const skillsList = Object.entries(character.skills)
+      .map(([name, level]) => `<li><span>${name}</span> <span>${level}</span></li>`)
+      .join('');
+    setAllById('skills-value', skillsList);
+  }
+  
