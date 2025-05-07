@@ -1,6 +1,7 @@
 [
   {
     "subcategory": "Smithing",
+    "location": "Blacksmith",
     "name": "Forge Iron Gauntlets",
     "conditions": [
       { "has_item": "IronPlate", "count_min": 2 }
@@ -15,6 +16,7 @@
   },
   {
     "subcategory": "Mining",
+    "location":"Mine",
     "name": "Hazardous Depth Mining",
     "conditions": [
       { "stat_min": { "DEX": 14 } },
@@ -32,6 +34,7 @@
   },
   {
     "subcategory": "Persuasion",
+    "location": "Marketplace",
     "name": "Gossip with Merchants",
     "conditions": [
       { "has_item": "Ale" }
