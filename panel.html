@@ -42,12 +42,24 @@
     </div>
     <div class="field-group">
       <label>Conditions</label>
-      <div class="conditions" id="condsContainer"></div>
+      <div class="conditions" id="condsContainer">
+        <div class="item-row">
+          <label>Type</label>
+          <label>Key</label>
+          <label>Value</label>
+        </div>
+      </div>
       <button id="addCondBtn">+ Condition</button>
     </div>
     <div class="field-group">
       <label>Results</label>
-      <div class="results" id="resContainer"></div>
+      <div class="results" id="resContainer">
+        <div class="item-row">
+          <label>Type</label>
+          <label>Key</label>
+          <label>Value</label>
+        </div>
+      </div>
       <button id="addResBtn">+ Result</button>
     </div>
     <button id="saveBtn">Save Action</button>
@@ -151,11 +163,31 @@ fetch('action_categories.json')
         return select;
     } else if (type === 'stat_min' || type === 'stat_increase') { // Add this condition
         const select = document.createElement('select');
-        // Replace this with your actual stats from character.js
-        const stats = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
-        stats.forEach(stat => select.add(new Option(stat, stat)));
-        select.value = initialValue;
-        return select;
+        // Fetch stats from character_stat.json and populate the select element
+        fetch('character_stat.json')  // Corrected the filename to character_stat.json
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch character stats');
+                }
+                return response.json();
+            })
+            .then(statsData => {
+                //statsData is an array
+                 statsData.forEach(stat => {
+                    select.add(new Option(stat, stat));
+                });
+                select.value = initialValue;
+            })
+            .catch(error => {
+                console.error("Error fetching or processing character_stat.json:", error);
+                // Handle error (e.g., display a message, use default stats)
+                const defaultStats = [
+                    "max_energy", 
+                ];
+                defaultStats.forEach(stat =>  select.add(new Option(stat, stat)));
+                select.value = initialValue;
+            });
+            return select;
     }
     else {
         const input = document.createElement('input');
@@ -168,7 +200,9 @@ fetch('action_categories.json')
 
     function addCond() {
       const row = document.createElement('div'); row.className = 'item-row';
-      const sel = document.createElement('select'); condTypes.forEach(t => sel.add(new Option(t,t)));
+      const sel = document.createElement('select');
+	  sel.add(new Option('', 'Select a condition type'));  // Added placeholder
+	  condTypes.forEach(t => sel.add(new Option(t,t)));
       let keyField = createKeyField('', '');
       const valI = document.createElement('input'); valI.placeholder = 'value';
       const del = document.createElement('button'); del.textContent = '×'; del.onclick = () => row.remove();
@@ -183,7 +217,9 @@ fetch('action_categories.json')
 
     function addRes() {
       const row = document.createElement('div'); row.className = 'item-row';
-      const sel = document.createElement('select'); resultTypes.forEach(t => sel.add(new Option(t,t)));
+      const sel = document.createElement('select');
+	  sel.add(new Option('', 'Select a result type'));  // Added placeholder
+	  resultTypes.forEach(t => sel.add(new Option(t,t)));
       let keyField = createKeyField('', '');
       const valI = document.createElement('input'); valI.placeholder = 'value';
       const del = document.createElement('button'); del.textContent = '×'; del.onclick = () => row.remove();
