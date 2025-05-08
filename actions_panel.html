@@ -10,7 +10,7 @@
     .field-group label { display: block; font-weight: bold; margin-bottom: 5px; }
     select, input { width: 100%; padding: 5px; box-sizing: border-box; }
     .conditions, .results { margin-top: 5px; }
-    .item-row { display: flex; align-items:center; margin-bottom: 5px; }
+    .item-row { display: flex; align-items: center; margin-bottom: 5px; }
     .item-row select, .item-row input { margin-right: 5px; }
     .item-row button { margin-left: auto; }
     #actionList { list-style: none; padding: 0; }
@@ -27,6 +27,10 @@
         padding: 10px;
         border: 1px solid red;
         background-color: #ffe0e0;
+    }
+    .results .item-row label:nth-child(4),
+    .results .item-row input:nth-child(4) {
+        width: 80px; /* Adjust width as needed */
     }
     
   </style>
@@ -65,6 +69,7 @@
           <label>Type</label>
           <label>Key</label>
           <label>Value</label>
+          <label>Chance</label>
         </div>
       </div>
       <button id="addResBtn">+ Result</button>
@@ -75,6 +80,12 @@
 
   <div class="action-list-container">
     <h2>Loaded Actions</h2>
+    <div class="field-group">
+        <label>Filter by Location</label>
+        <select id="filterLocationSelect">
+            <option value="">All Locations</option>
+        </select>
+    </div>
     <ul id="actionList"></ul>
   </div>
 
@@ -93,54 +104,11 @@
 
      let catOptions = [];
     let locationOptions = [];
-
+    let actions = [];
+    let editIndex = -1;
     let loadedFilename = 'actions.json';
-    // Load categories from action_categories.json, fallback to default list
-fetch('action_categories.json')
-  .then(res => res.ok ? res.json() : Promise.reject('not found'))
-  .then(data => {
-    if (Array.isArray(data)) {
-      catOptions = data;
-    } else {
-      // Flatten all subcategories from all categories
-      catOptions = Object.values(data).flat();
-    }
-    initSubcategories();
-  })
-  .catch(err => {
-    console.warn('action_categories.json not found or invalid, using default categories.');
-    catOptions = ['weapons','armor','mining','social','merchant','explore'];
-    initSubcategories();
-  });
-  // Load locations from location.json
-  fetch('map.json')
-  .then(res => res.ok ? res.json() : Promise.reject())
-  .then(data => {
-    // Extract all location IDs from all areas
-    locationOptions = [];
-    if (data.map && data.map.areas) {
-      Object.values(data.map.areas).forEach(area => {
-        if (area.locations && Array.isArray(area.locations)) {
-          locationOptions.push(...area.locations.map(loc => loc.id));
-        }
-      });
-    }
-    initLocation();
-  })
-  .catch(() => {
-    locationOptions = ['inventory', 'battle', 'world']; // Default locations
-    initLocation();
-  });
-    // Attempt to load items.json if present
-    let itemsList = [];
-    fetch('items_list.json')
-      .then(res => res.ok ? res.json() : Promise.reject())
-      .then(data => { itemsList = data.items || data; })
-      .catch(() => {});
 
-    const condTypes = ['stat_min','has_item','flag_true','flag_false'];
-    const resultTypes = ['ep_cost','stat_increase','add_item','set_flag','message'];
-
+    // Get DOM elements
     const subSelect = document.getElementById('subSelect');
 	const locationSelect = document.getElementById('locationSelect');
     const condsContainer = document.getElementById('condsContainer');
@@ -155,10 +123,58 @@ fetch('action_categories.json')
     const addResBtn = document.getElementById('addResBtn');
     const panelTitle = document.getElementById('panelTitle');
     const errorMessageElement = document.getElementById('error-message');
+    const filterLocationSelect = document.getElementById('filterLocationSelect'); // Get the filter dropdown
 
 
-    let actions = [];
-    let editIndex = -1;
+    // Load categories from action_categories.json, fallback to default list
+    fetch('action_categories.json')
+        .then(res => res.ok ? res.json() : Promise.reject('not found'))
+        .then(data => {
+            if (Array.isArray(data)) {
+                catOptions = data;
+            } else {
+                // Flatten all subcategories from all categories
+                catOptions = Object.values(data).flat();
+            }
+            initSubcategories();
+        })
+        .catch(err => {
+            console.warn('action_categories.json not found or invalid, using default categories.');
+            catOptions = ['weapons','armor','mining','social','merchant','explore'];
+            initSubcategories();
+        });
+
+    // Load locations from map.json
+    fetch('map.json')
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(data => {
+            // Extract all location IDs from all areas
+            locationOptions = [];
+            if (data.map && data.map.areas) {
+                Object.values(data.map.areas).forEach(area => {
+                    if (area.locations && Array.isArray(area.locations)) {
+                        locationOptions.push(...area.locations.map(loc => loc.id));
+                    }
+                });
+            }
+            initLocation();
+        })
+        .catch(() => {
+            locationOptions = ['inventory', 'battle', 'world']; // Default locations
+            initLocation();
+        });
+
+    // Attempt to load items.json if present
+    let itemsList = [];
+    fetch('items_list.json')
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(data => { itemsList = data.items || data; })
+        .catch(() => {});
+
+    const condTypes = ['stat_min','has_item','flag_true','flag_false'];
+    const resultTypes = ['ep_cost','stat_increase','add_item','set_flag','message'];
+
+
 
     function initSubcategories() {
       subSelect.innerHTML = '';
@@ -168,52 +184,54 @@ fetch('action_categories.json')
 	function initLocation() {
       locationSelect.innerHTML = '';
       locationOptions.forEach(loc => locationSelect.add(new Option(loc, loc)));
+      // Populate the filter dropdown
+      filterLocationSelect.innerHTML = '<option value="">All Locations</option>'; // Clear first
+      locationOptions.forEach(loc => filterLocationSelect.add(new Option(loc, loc)));
     }
 
-    
-
-
-   function createKeyField(type, initialValue = '') {
-    if ((type === 'has_item' || type === 'add_item') && itemsList.length) {
-        const select = document.createElement('select');
-        itemsList.forEach(item => select.add(new Option(item, item)));
-        select.value = initialValue;
-        return select;
-    } else if (type === 'stat_min' || type === 'stat_increase') { // Add this condition
-        const select = document.createElement('select');
-        // Fetch stats from character_stat.json and populate the select element
-        fetch('character_stat.json')  // Corrected the filename to character_stat.json
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch character stats');
-                }
-                return response.json();
-            })
-            .then(statsData => {
-                //statsData is an array
-                 statsData.forEach(stat => {
-                    select.add(new Option(stat, stat));
-                });
-                select.value = initialValue;
-            })
-            .catch(error => {
-                console.error("Error fetching or processing character_stat.json:", error);
-                // Handle error (e.g., display a message, use default stats)
-                const defaultStats = [
-                    "max_energy", 
-                ];
-                defaultStats.forEach(stat =>  select.add(new Option(stat, stat)));
-                select.value = initialValue;
-            });
+    function createKeyField(type, initialValue = '') {
+        if ((type === 'has_item' || type === 'add_item') && itemsList.length) {
+            const select = document.createElement('select');
+            itemsList.forEach(item => select.add(new Option(item, item)));
+            select.value = initialValue;
             return select;
+        } else if (type === 'stat_min' || type === 'stat_increase') {
+            const select = document.createElement('select');
+            fetch('character_stat.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch character stats');
+                    }
+                    return response.json();
+                })
+                .then(statsData => {
+                    statsData.forEach(stat => {
+                        select.add(new Option(stat, stat));
+                    });
+                    select.value = initialValue;
+                })
+                .catch(error => {
+                    console.error("Error fetching or processing character_stat.json:", error);
+                    const defaultStats = [
+                        "max_energy", "energy",    "max_health",
+                        "health",     "copper",    "silver",
+                        "gold",       "strength",  "dexterity",
+                        "constitution", "intelligence", "charisma",
+                        "wisdom",     "food",      "drink",
+                        "reputation"
+                    ];
+                    defaultStats.forEach(stat =>  select.add(new Option(stat, stat)));
+                    select.value = initialValue;
+                });
+            return select;
+        }
+        else {
+            const input = document.createElement('input');
+            input.placeholder = 'key';
+            input.value = initialValue;
+            return input;
+        }
     }
-    else {
-        const input = document.createElement('input');
-        input.placeholder = 'key';
-        input.value = initialValue;
-        return input;
-    }
-}
 
 
     function addCond() {
@@ -240,26 +258,33 @@ fetch('action_categories.json')
 	  resultTypes.forEach(t => sel.add(new Option(t,t)));
       let keyField = createKeyField('', '');
       const valI = document.createElement('input'); valI.placeholder = 'value';
+      const chanceI = document.createElement('input'); chanceI.placeholder = 'chance'; chanceI.type = 'number'; chanceI.min = '0'; chanceI.max = '1'; chanceI.step = '0.01';
       const del = document.createElement('button'); del.textContent = '×'; del.onclick = () => row.remove();
       sel.onchange = () => {
         const newKey = createKeyField(sel.value, '');
-        row.replaceChild(newKey, keyField);
+        row.insertBefore(newKey, valI.nextSibling); // Insert key field before value
+        if (keyField) {
+            row.removeChild(keyField);
+        }
         keyField = newKey;
       };
-      row.append(sel, keyField, valI, del);
+      row.append(sel, keyField, valI, chanceI, del);
       resContainer.append(row);
     }
 
     function renderList() {
-      actionList.innerHTML = '';
-      actions.forEach((act, i) => {
-        const li = document.createElement('li');
-        li.textContent = `[${act.subcategory}] ${act.name}`;
-        const edit = document.createElement('button'); edit.textContent = 'Edit'; edit.onclick = () => loadAction(i);
-        const del = document.createElement('button'); del.textContent = 'Delete'; del.onclick = () => { actions.splice(i,1); renderList(); };
-        li.append(edit, del);
-        actionList.append(li);
-      });
+        const selectedLocation = filterLocationSelect.value;
+        actionList.innerHTML = ''; // Clear the list
+        actions.forEach((act, i) => {
+            if (!selectedLocation || act.location === selectedLocation) { // Only show if no filter or matches filter
+                const li = document.createElement('li');
+                li.textContent = `[${act.subcategory} - ${act.location}] ${act.name}`;
+                const edit = document.createElement('button'); edit.textContent = 'Edit'; edit.onclick = () => loadAction(i);
+                const del = document.createElement('button'); del.textContent = 'Delete'; del.onclick = () => { actions.splice(i,1); renderList(); };
+                li.append(edit, del);
+                actionList.append(li);
+            }
+        });
     }
 
     function clearPanel() {
@@ -275,21 +300,21 @@ fetch('action_categories.json')
   panelTitle.textContent = `Edit Action ${i}`;
   const a = actions[i];
   subSelect.value = a.subcategory;
-  locationSelect.value = a.location || 'inventory'; // set default value if location is undefined
+  locationSelect.value = a.location || 'inventory';
   nameInput.value = a.name;
   condsContainer.innerHTML = '';
   resContainer.innerHTML = '';
 
-  if (a.conditions && Array.isArray(a.conditions)) { // Check if conditions exists and is an array.
+  if (a.conditions && Array.isArray(a.conditions)) {
     a.conditions.forEach(cond => {
       addCond();
-      const row = condsContainer.lastElementChild; // Get the last added row
+      const row = condsContainer.lastElementChild;
       const sel = row.querySelector('select');
       const inputKey = row.querySelector('input:nth-of-type(1)');
       const inputValue = row.querySelector('input:nth-of-type(2)');
 
       const condType = Object.keys(cond)[0];
-      sel.value = condType; // Set the select dropdown
+      sel.value = condType;
 
       let keyName = '';
       let keyValue = '';
@@ -305,23 +330,24 @@ fetch('action_categories.json')
         keyValue = '';
       }
 
-      // Update the key and value inputs
       const newKeyField = createKeyField(condType, keyName);
-      row.replaceChild(newKeyField, inputKey); // Replace the input
+      row.replaceChild(newKeyField, inputKey);
       inputValue.value = keyValue;
     });
   }
 
-  if (a.results && Array.isArray(a.results)) {  // Check if results exists and is an array.
+  if (a.results && Array.isArray(a.results)) {
     a.results.forEach(res => {
       addRes();
-      const row = resContainer.lastElementChild;  // Get the last added row.
+      const row = resContainer.lastElementChild;
       const sel = row.querySelector('select');
       const inputKey = row.querySelector('input:nth-of-type(1)');
       const inputValue = row.querySelector('input:nth-of-type(2)');
+      const inputChance = row.querySelector('input[type="number"]');
 
       const resType = Object.keys(res)[0];
       sel.value = resType;
+      inputChance.value = res.chance !== undefined ? res.chance : 1.0; // Default to 1.0 if not present
 
       let keyName = '';
       let keyValue = '';
@@ -341,7 +367,6 @@ fetch('action_categories.json')
         keyValue = res.message;
       }
 
-      // Update the key and value inputs
       const newKeyField = createKeyField(resType, keyName);
       row.replaceChild(newKeyField, inputKey);
       inputValue.value = keyValue;
@@ -362,16 +387,19 @@ fetch('action_categories.json')
         if (t==='has_item') return { has_item:k, count_min:+v };
         if (t==='flag_true') return { flag_true:k };
         if (t==='flag_false') return { flag_false:k };
+        return { [t]: t === 'stat_min' ?  { [k]: +v } : t === 'has_item' ? k :  k };
       });
       const res = [...resContainer.querySelectorAll('.item-row')].map(r => {
         const t = r.querySelector('select').value;
         const k = r.querySelector('input:nth-of-type(1)').value;
         const v = r.querySelector('input:nth-of-type(2)').value;
-        if (t==='ep_cost') return { ep_cost:+v };
-        if (t==='stat_increase') return { stat_increase:{[k]:+v} };
-        if (t==='add_item') return { add_item:{item:k, count:+v} };
-        if (t==='set_flag') return { set_flag:k };
-        if (t==='message') return { message:v };
+        const chance = r.querySelector('input[type="number"]').value;
+        if (t === 'ep_cost') return { ep_cost: +v, chance: +chance };
+        if (t === 'stat_increase') return { stat_increase: { [k]: +v }, chance: +chance };
+        if (t === 'add_item') return { add_item: { item: k, count: +v }, chance: +chance };
+        if (t === 'set_flag') return { set_flag: k, chance: +chance };
+        if (t === 'message') return { message: v, chance: +chance };
+        return { [t]: t === 'ep_cost' ? +v : t === 'stat_increase' ? { [k]: +v } : t === 'add_item' ? { item: k, count: +v } : k , chance: +chance};
       });
       const obj = { subcategory:sub, location:location, name, conditions:conds, results:res }; //added location
       editIndex<0 ? actions.push(obj) : actions[editIndex]=obj;
@@ -389,15 +417,6 @@ fetch('action_categories.json')
         clearPanel(); renderList();
       };
       r.readAsText(f);
-    };
-
-    saveFileBtn.onclick = () => {
-      const blob = new Blob([JSON.stringify(actions,null,2)],{type:'application/json'});
-      const a = document.createElement('a');
-      a.href=URL.createObjectURL(blob);
-      a.download = loadedFilename || 'actions.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
     };
 
     // Auto-load actions_list.json
@@ -422,6 +441,7 @@ fetch('action_categories.json')
             });
     };
 
+    filterLocationSelect.onchange = renderList;
     addCondBtn.onclick=addCond;
     addResBtn.onclick=addRes;
   </script>

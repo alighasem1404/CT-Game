@@ -7,13 +7,19 @@
           {
             "to": "slums",
             "conditions": [
-              { "stat_min": { "STR": 6 } }
+              {
+                "stat_min": {
+                  "STR": 6
+                }
+              }
             ]
           },
           {
             "to": "far_north",
             "conditions": [
-              { "has_item": "ColdCoat" }
+              {
+                "has_item": "ColdCoat"
+              }
             ]
           }
         ],
@@ -32,21 +38,21 @@
           }
         ]
       },
-      "mine":{
-          "description": ""
-      },
       "slums": {
         "description": "The crowded, poorer quarter of town.",
         "connections": [
           {
             "to": "market",
             "conditions": [
-              { "stat_min": { "STR": 6 } }
+              {
+                "stat_min": {
+                  "STR": 6
+                }
+              }
             ]
           }
         ],
         "locations": [
-          
           {
             "id": "house",
             "description": "A modest dwelling, its walls barely standing."
@@ -72,6 +78,21 @@
           {
             "id": "ice_fields",
             "description": "Vast plains of ice and snow."
+          }
+        ]
+      },
+      "mine": {
+        "description": "mine",
+        "connections": [
+          {
+            "to": "slums",
+            "conditions": []
+          }
+        ],
+        "locations": [
+          {
+            "id": "main_tunel",
+            "description": "main tunel of the mine"
           }
         ]
       }

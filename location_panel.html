@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Map Editor</title>
+<style>
+  .panel, .action-list-container { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; background-color: #444; }
+  .panel h2, .action-list-container h2 { margin-top: 0; color: #eee; }
+  .field-group { margin-bottom: 10px; }
+  .field-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #ddd; }
+  select, input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #555; background-color: #555; color: #eee; }
+  .conditions, .results { margin-top: 5px; }
+  .item-row { display: flex; align-items: center; margin-bottom: 5px; }
+  .item-row select, .item-row input { margin-right: 5px; background-color: #666; color: #eee; border: 1px solid #777; }
+  .item-row button { margin-left: auto; padding: 8px 12px; background-color: #555; color: #eee; border: none; cursor: pointer; }
+  #locationList { list-style: none; padding: 0; }
+  #locationList li { padding: 10px; border-bottom: 1px solid #555; display: flex; justify-content: space-between; color: #eee; }
+  button { padding: 8px 12px; background-color: #555; color: #eee; border: none; cursor: pointer; }
+
+  body { font-family: Arial, sans-serif; margin: 20px; background-color: #333; color: #eee; }
+  #error-message {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid red;
+    background-color: #ffe0e0;
+  }
+  .results .item-row label:nth-child(4),
+  .results .item-row input:nth-child(4) {
+    width: 80px; /* Adjust width as needed */
+  }
+</style>
+</head>
+<body>
+    <h1>Loactions Creator & Editor</h1>
+
+<div class="panel">
+  <h2>Add/Edit Location</h2>
+  <div class="field-group">
+    <label for="areaSelect">Area:</label>
+    <select id="areaSelect" name="areaSelect">
+      </select>
+  </div>
+  <div class="field-group">
+    <label for="locationId">ID:</label>
+    <input type="text" id="locationId" name="locationId">
+  </div>
+  <div class="field-group">
+    <label for="locationDescription">Description:</label>
+    <input type="text" id="locationDescription" name="locationDescription">
+  </div>
+  <button onclick="saveLocation()">Save Location</button>
+</div>
+
+<div class="action-list-container">
+  <h2>Locations</h2>
+  <ul id="locationList">
+    </ul>
+  <button onclick="saveMapData()">Save to map.json</button>
+</div>
+
+<div id="error-message" style="display:none;"></div>
+
+<script>
+  let mapData = null; // Store the map data globally
+
+  function loadMapData() {
+    fetch('map.json')
+      .then(response => response.json())
+      .then(data => {
+        mapData = data; // Store the data
+        populateAreaDropdown(); // Populate dropdown
+        displayLocations(); // Call displayLocations after data is loaded
+      })
+      .catch(error => {
+        document.getElementById('error-message').textContent = 'Error loading map data: ' + error;
+        document.getElementById('error-message').style.display = 'block';
+      });
+  }
+
+  function populateAreaDropdown() {
+    const areaSelect = document.getElementById('areaSelect');
+    areaSelect.innerHTML = ''; // Clear previous options
+
+    if (!mapData || !mapData.map || !mapData.map.areas) {
+      console.error("Invalid map data structure.");
+      document.getElementById('error-message').textContent = 'Invalid map data structure.  Check map.json is structured correctly.';
+      document.getElementById('error-message').style.display = 'block';
+      return;
+    }
+
+    const areas = mapData.map.areas;
+    for (const areaName in areas) {
+      const option = document.createElement('option');
+      option.value = areaName;
+      option.textContent = areaName;
+      areaSelect.appendChild(option);
+    }
+  }
+
+  function displayLocations() {
+    const locationList = document.getElementById('locationList');
+    locationList.innerHTML = ''; // Clear previous list
+
+    if (!mapData || !mapData.map || !mapData.map.areas) {
+      console.error("Invalid map data structure.");
+      document.getElementById('error-message').textContent = 'Invalid map data structure.  Check map.json is structured correctly.';
+      document.getElementById('error-message').style.display = 'block';
+      return;
+    }
+    const areas = mapData.map.areas;
+    for (const areaName in areas) {
+      if (areas[areaName].locations && Array.isArray(areas[areaName].locations)) {
+        const areaHeading = document.createElement('h3');
+        areaHeading.textContent = `${areaName} Locations`;
+        areaHeading.style.color = '#ddd';
+        locationList.appendChild(areaHeading);
+
+        areas[areaName].locations.forEach(location => {
+          const listItem = document.createElement('li');
+          listItem.textContent = `${location.id}: ${location.description}`;
+          const editButton = document.createElement('button');
+          editButton.textContent = 'Edit';
+          editButton.onclick = () => populateLocationForm(areaName, location.id); // Pass areaName
+          listItem.appendChild(editButton);
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = 'Delete';
+          deleteButton.onclick = () => deleteLocation(areaName, location.id);
+          listItem.appendChild(deleteButton);
+          locationList.appendChild(listItem);
+        });
+      }
+    }
+  }
+
+  function populateLocationForm(areaName, locationId) {
+    const areaSelect = document.getElementById('areaSelect');
+
+    const area = mapData.map.areas[areaName]; // Access area using areaName
+     if (!area || !area.locations) {
+        console.error("Area or locations not found for area:", areaName);
+        document.getElementById('error-message').textContent = 'Area or locations not found.';
+        document.getElementById('error-message').style.display = 'block';
+        return;
+    }
+    const location = area.locations.find(loc => loc.id === locationId);
+    if (!location) {
+        console.error("Location not found for ID:", locationId, "in area:", areaName);
+        document.getElementById('error-message').textContent = 'Location not found.';
+        document.getElementById('error-message').style.display = 'block';
+        return;
+    }
+    areaSelect.value = areaName;
+    document.getElementById('locationId').value = location.id;
+    document.getElementById('locationDescription').value = location.description;
+    // Store the original ID for saving.
+    document.getElementById('locationId').dataset.originalId = location.id;
+  }
+
+  function saveLocation() {
+    const areaName = document.getElementById('areaSelect').value;
+    const id = document.getElementById('locationId').value;
+    const description = document.getElementById('locationDescription').value;
+    const originalId = document.getElementById('locationId').dataset.originalId;
+
+
+    if (!areaName) {
+      console.error("Area name is undefined.  Cannot save location.");
+      document.getElementById('error-message').textContent = 'Area name is undefined.  Cannot save location.';
+      document.getElementById('error-message').style.display = 'block';
+      return;
+    }
+    let area = mapData.map.areas[areaName];
+     if (!area || !area.locations) {
+        console.error("Area or locations not found for area:", areaName);
+        document.getElementById('error-message').textContent = 'Area or locations not found.';
+        document.getElementById('error-message').style.display = 'block';
+        return;
+    }
+
+    if (originalId) {
+      // Editing existing location
+      const index = area.locations.findIndex(loc => loc.id === originalId);
+      if (index !== -1) {
+        area.locations[index].id = id;
+        area.locations[index].description = description;
+      } else {
+        console.warn("Original location not found.  Adding as new.");
+        area.locations.push({ id, description }); // Add as new if original not found
+      }
+    } else {
+      // Adding new location
+      area.locations.push({ id, description });
+    }
+    // update the mapData
+    mapData.map.areas[areaName] = area;
+    console.log('Saving location:', { areaName, id, description, originalId });
+    displayLocations(); // Refresh the list after saving
+    // Clear the form
+    document.getElementById('areaSelect').value = '';
+    document.getElementById('locationId').value = '';
+    document.getElementById('locationDescription').value = '';
+    delete document.getElementById('locationId').dataset.originalId;
+  }
+
+  function deleteLocation(areaName, locationId) {
+    if (!confirm("Are you sure you want to delete this location?")) {
+      return;
+    }
+
+    const area = mapData.map.areas[areaName];
+    if (!area || !area.locations) {
+      console.error("Area or locations not found for area:", areaName);
+      document.getElementById('error-message').textContent = 'Area or locations not found.';
+      document.getElementById('error-message').style.display = 'block';
+      return;
+    }
+
+    const index = area.locations.findIndex(loc => loc.id === locationId);
+    if (index !== -1) {
+      area.locations.splice(index, 1); // Remove the location
+      mapData.map.areas[areaName] = area; // Update mapData
+      console.log(`Deleted location ${locationId} from area ${areaName}`);
+      displayLocations(); // Refresh the list
+    } else {
+      console.warn(`Location ${locationId} not found in area ${areaName}`);
+      document.getElementById('error-message').textContent = `Location not found.`;
+      document.getElementById('error-message').style.display = 'block';
+    }
+  }
+
+  function saveMapData() {
+    // Convert the mapData object to a JSON string
+    const jsonData = JSON.stringify(mapData, null, 2); // The '2' makes the JSON more readable
+
+    try {
+      // Use a Blob and a URL to create a downloadable file
+      const blob = new Blob([jsonData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      // Create a link element to trigger the download
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'map.json'; //  Filename for the downloaded file
+      document.body.appendChild(a); // Append the link to the body
+      a.click(); // Trigger the download
+      document.body.removeChild(a); // Remove the link after download
+      URL.revokeObjectURL(url); // Clean up the URL object
+
+      console.log('Map data saved successfully to map.json');
+      alert('Map data saved successfully to map.json!  Check your downloads folder.');
+    } catch (error) {
+      console.error('Error saving map data:', error);
+      document.getElementById('error-message').textContent = 'Error saving map data: ' + error;
+      document.getElementById('error-message').style.display = 'block';
+    }
+  }
+
+  // Load the map data when the page loads
+  window.onload = loadMapData;
+</script>
+<a href="panels.html" class="w-full">
+    <button class="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-teal-500 text-white font-semibold text-lg
+               shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300
+               focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
+               flex items-center justify-center">
+            Panel Central
+    </button>
+</a>
+</body>
+</html>

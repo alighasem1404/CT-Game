@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Editor</title>
+    <style>
+        .panel, .action-list-container {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #444;
+        }
+
+        .panel h2, .action-list-container h2 {
+            margin-top: 0;
+            color: #ddd;
+        }
+
+        .field-group {
+            margin-bottom: 10px;
+        }
+
+        .field-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ddd;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #777;
+            background-color: #555;
+            color: #eee;
+        }
+
+        .conditions, .results {
+            margin-top: 10px;
+            border: 1px solid #666;
+            padding: 10px;
+        }
+
+        .conditions h3, .results h3 {
+            color: #ddd;
+            margin-top: 0;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .item-row label {
+            color: #ddd;
+            margin-right: 5px;
+        }
+
+        .item-row select, .item-row input {
+            margin-right: 10px;
+            border: 1px solid #777;
+            background-color: #555;
+            color: #eee;
+            padding: 5px;
+        }
+
+        .item-row button {
+            margin-left: auto;
+            padding: 8px 12px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .item-row button:hover {
+            background-color: #4cae4c;
+        }
+
+        #actionList {
+            list-style: none;
+            padding: 0;
+        }
+
+        #actionList li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            background-color: #555;
+            color: #eee;
+        }
+
+        #actionList li:last-child {
+            border-bottom: none;
+        }
+
+        #actionList li span {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        #actionList li button {
+            padding: 5px 10px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        #actionList li .edit-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+
+        #actionList li .edit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        #actionList li .delete-btn {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+        }
+
+        #actionList li .delete-btn:hover {
+            background-color: #c9302c;
+        }
+
+        button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #333;
+            color: #eee;
+        }
+
+        #error-message {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid red;
+            background-color: #ffe0e0;
+            display: none; /* Initially hidden */
+        }
+
+        .results .item-row label:nth-child(4),
+        .results .item-row input:nth-child(4) {
+            width: 80px;
+        }
+
+        #locationPanel {
+            background-color: #444;
+            padding: 15px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+
+        #locationPanel h2 {
+            color: #ddd;
+            margin-top: 0;
+        }
+
+        #locationPanel .field-group {
+            margin-bottom: 10px;
+        }
+
+        #locationPanel .field-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ddd;
+        }
+
+        #locationPanel input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #777;
+            background-color: #555;
+            color: #eee;
+        }
+
+        #locationPanel button {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #locationPanel button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="error-message"></div>
+
+    <div class="panel">
+        <h2>Add/Edit Area</h2>
+        <div class="field-group">
+            <label for="areaId">Area ID:</label>
+            <input type="text" id="areaId" placeholder="Enter area ID (e.g., forest)" readonly>
+            <small>Leave blank to add a new area.</small>
+        </div>
+        <div class="field-group">
+            <label for="areaDescription">Description:</label>
+            <input type="text" id="areaDescription" placeholder="Enter area description">
+        </div>
+
+        <h3>Connections</h3>
+        <div id="connections">
+            </div>
+        <button type="button" onclick="addConnection()">Add Connection</button>
+
+        <h3>Locations</h3>
+        <div id="areaLocations">
+            </div>
+        <button type="button" onclick="openAddLocationPanel()">Add/Edit Location</button>
+
+        <button type="button" onclick="saveArea()">Save Area</button>
+        <button type="button" onclick="cancelEditArea()">Cancel</button>
+    </div>
+
+    <div class="action-list-container">
+        <h2>Areas</h2>
+        <ul id="areaList">
+            </ul>
+        <button type="button" onclick="prepareAddArea()">Add New Area</button>
+    </div>
+
+    <div id="locationPanel" style="display: none;">
+        <h2>Add/Edit Location</h2>
+        <div class="field-group">
+            <label for="locationId">Location ID:</label>
+            <input type="text" id="locationId" placeholder="Enter location ID">
+        </div>
+        <div class="field-group">
+            <label for="locationDescription">Description:</label>
+            <input type="text" id="locationDescription" placeholder="Enter location description">
+        </div>
+        <button type="button" onclick="saveLocationToArea()">Save Location</button>
+        <button type="button" onclick="closeAddLocationPanel()">Cancel</button>
+    </div>
+    <button id="saveButton" onclick="saveToFile()">Save to File</button>
+
+
+    <script>
+        let jsonData = {
+            "map": {
+                "areas": {
+                    "market": {
+                        "description": "The trade hub full of shops and guilds.",
+                        "connections": [
+                            {
+                                "to": "slums",
+                                "conditions": [
+                                    { "stat_min": { "STR": 6 } }
+                                ]
+                            },
+                            {
+                                "to": "far_north",
+                                "conditions": [
+                                    { "has_item": "ColdCoat" }
+                                ]
+                            }
+                        ],
+                        "locations": [
+                            {
+                                "id": "blacksmith",
+                                "description": "A forge for crafting weapons."
+                            },
+                            {
+                                "id": "tavern",
+                                "description": "A cozy tavern where locals share news and drink."
+                            },
+                            {
+                                "id": "main_square",
+                                "description": "The central gathering place of the market district."
+                            }
+                        ]
+                    },
+                    "mine": {
+                        "description": ""
+                    },
+                    "slums": {
+                        "description": "The crowded, poorer quarter of town.",
+                        "connections": [
+                            {
+                                "to": "market",
+                                "conditions": [
+                                    { "stat_min": { "STR": 6 } }
+                                ]
+                            }
+                        ],
+                        "locations": [
+                            {
+                                "id": "house",
+                                "description": "A modest dwelling, its walls barely standing."
+                            },
+                            {
+                                "id": "old_bridge",
+                                "description": "A rickety wooden bridge spanning a narrow gutter."
+                            },
+                            {
+                                "id": "bar",
+                                "description": "A dingy bar where slum residents drown their sorrows."
+                            }
+                        ]
+                    },
+                    "far_north": {
+                        "description": "The frozen wastes beyond the town.",
+                        "connections": [
+                            {
+                                "to": "market"
+                            }
+                        ],
+                        "locations": [
+                            {
+                                "id": "ice_fields",
+                                "description": "Vast plains of ice and snow."
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        let currentAreaId = null;
+        let currentAreaLocations = [];
+        let editingLocationId = null;
+
+
+        function displayAreas() {
+            const areaList = document.getElementById('areaList');
+            areaList.innerHTML = '';
+            for (const areaId in jsonData.map.areas) {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span>${areaId}: ${jsonData.map.areas[areaId].description || 'No description'}</span>
+                    <div>
+                        <button class="edit-btn" onclick="editArea('${areaId}')">Edit</button>
+                        <button class="delete-btn" onclick="deleteArea('${areaId}')">Delete</button>
+                    </div>
+                `;
+                areaList.appendChild(listItem);
+            }
+        }
+
+        function prepareAddArea() {
+            currentAreaId = null;
+            currentAreaLocations = [];
+            document.getElementById('areaId').value = '';
+            document.getElementById('areaId').readOnly = false;
+            document.getElementById('areaDescription').value = '';
+            document.getElementById('connections').innerHTML = '';
+            document.getElementById('areaLocations').innerHTML = '';
+        }
+
+        function editArea(areaId) {
+            currentAreaId = areaId;
+            const areaData = jsonData.map.areas[areaId];
+            currentAreaLocations = [...(areaData.locations || [])];
+
+            document.getElementById('areaId').value = areaId;
+            document.getElementById('areaId').readOnly = true;
+            document.getElementById('areaDescription').value = areaData.description || '';
+
+            // Display connections
+            const connectionsDiv = document.getElementById('connections');
+            connectionsDiv.innerHTML = '';
+            if (areaData.connections) {
+                areaData.connections.forEach((connection, index) => {
+                    const connectionDiv = createConnectionElement(connection, index);
+                    connectionsDiv.appendChild(connectionDiv);
+                });
+            }
+
+            // Display locations
+            displayAreaLocations();
+        }
+
+        function createConditionElement(condition) {
+            const conditionDiv = document.createElement('div');
+            conditionDiv.classList.add('item-row');
+            const conditionType = Object.keys(condition)[0];
+            const conditionValue = condition[conditionType];
+
+            const typeLabel = document.createElement('label');
+            typeLabel.textContent = 'Type:';
+            const typeSelect = document.createElement('select');
+            const allowedTypes = ['stat_min', 'has_item'];
+            allowedTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                option.selected = type === conditionType;
+                typeSelect.appendChild(option);
+            });
+
+            const valueLabel = document.createElement('label');
+            valueLabel.textContent = 'Value:';
+            const valueInput = documentcreateElement('input');
+            valueInput.type = 'text';
+            valueInput.value = typeof conditionValue === 'object' ? JSON.stringify(conditionValue) : conditionValue;
+
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.onclick = function () {
+                conditionDiv.remove();
+            };
+
+            conditionDiv.appendChild(typeLabel);
+            conditionDiv.appendChild(typeSelect);
+            conditionDiv.appendChild(valueLabel);
+            conditionDiv.appendChild(valueInput);
+            conditionDiv.appendChild(removeButton);
+
+            return conditionDiv;
+        }
+
+        function createConnectionElement(connection, index) {
+            const connectionDiv = document.createElement('div');
+            connectionDiv.classList.add('item-row');
+
+            const toLabel = document.createElement('label');
+            toLabel.textContent = 'To:';
+            const toSelect = document.createElement('select');
+            toSelect.id = `connectionTo-${index}`;
+
+            // Populate the dropdown with area IDs
+            for (const areaId in jsonData.map.areas) {
+                const option = document.createElement('option');
+                option.value = areaId;
+                option.textContent = areaId;
+                if(connection.to === areaId){
+                    option.selected = true;
+                }
+                toSelect.appendChild(option);
+            }
+
+            const conditionsDiv = document.createElement('div');
+            conditionsDiv.classList.add('conditions');
+            const conditionsHeader = document.createElement('h3');
+            conditionsHeader.textContent = 'Conditions:';
+            conditionsDiv.appendChild(conditionsHeader);
+            if (connection.conditions && connection.conditions.length > 0) {
+                connection.conditions.forEach(condition => {
+                    conditionsDiv.appendChild(createConditionElement(condition));
+                });
+            }
+            const addConditionButton = document.createElement('button');
+            addConditionButton.textContent = 'Add Condition';
+            addConditionButton.onclick = function () {
+                conditionsDiv.appendChild(createConditionElement({}));
+            };
+            conditionsDiv.appendChild(addConditionButton);
+
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove Connection';
+            removeButton.onclick = function () {
+                connectionDiv.remove();
+            };
+
+            connectionDiv.appendChild(toLabel);
+            connectionDiv.appendChild(toSelect);
+            connectionDiv.appendChild(conditionsDiv);
+            connectionDiv.appendChild(removeButton);
+
+            return connectionDiv;
+        }
+
+        function addConnection() {
+            const connectionsDiv = document.getElementById('connections');
+            connectionsDiv.appendChild(createConnectionElement({}));
+        }
+
+        function deleteArea(areaId) {
+            if (confirm(`Are you sure you want to delete area "${areaId}"?`)) {
+                delete jsonData.map.areas[areaId];
+                displayAreas();
+                prepareAddArea();
+            }
+        }
+
+        function saveArea() {
+            const areaId = document.getElementById('areaId').value.trim();
+            const description = document.getElementById('areaDescription').value.trim();
+            const connectionsDiv = document.getElementById('connections');
+            const connectionElements = connectionsDiv.querySelectorAll('.item-row');
+            const connections = [];
+
+            connectionElements.forEach(connElement => {
+                const toSelect = connElement.querySelector('select');
+                const conditionDivs = connElement.querySelectorAll('.conditions > .item-row');
+                const conditions = [];
+
+                conditionDivs.forEach(condDiv => {
+                    const typeSelect = condDiv.querySelector('select');
+                    const valueInput = condDiv.querySelector('input[type="text"]');
+                    if (typeSelect && valueInput) {
+                        const type = typeSelect.value;
+                        let value = valueInput.value.trim();
+                        try {
+                            value = JSON.parse(value);
+                        } catch (e) {
+                            // Keep as string if not valid JSON
+                        }
+                        conditions.push({ [type]: value });
+                }
+            });
+
+            if (toSelect && toSelect.value.trim()) {
+                connections.push({ to: toSelect.value.trim(), conditions: conditions });
+            }
+        });
+
+            if (currentAreaId) {
+                jsonData.map.areas[currentAreaId].description = description;
+                jsonData.map.areas[currentAreaId].connections = connections;
+                jsonData.map.areas[currentAreaId].locations = currentAreaLocations;
+            } else if (areaId) {
+                if (jsonData.map.areas[areaId]) {
+                    displayError(`Area with ID "${areaId}" already exists.`);
+                    return;
+                }
+                jsonData.map.areas[areaId] = { description: description, connections: connections, locations: currentAreaLocations };
+            } else {
+                displayError("Area ID cannot be empty when adding a new area.");
+                return;
+            }
+
+            hideError();
+            displayAreas();
+            prepareAddArea();
+        }
+
+        function cancelEditArea() {
+            prepareAddArea();
+        }
+
+        // Location management within an area
+        function displayAreaLocations() {
+            const locationsDiv = document.getElementById('areaLocations');
+            locationsDiv.innerHTML = '';
+
+            if (currentAreaLocations && currentAreaLocations.length > 0) {
+                currentAreaLocations.forEach((location, index) => {
+                    const locationItem = document.createElement('div');
+                    locationItem.classList.add('item-row');
+                    locationItem.innerHTML = `
+                        <label>ID:</label><span>${location.id}</span>
+                        <label>Description:</label><span>${location.description}</span>
+                    `;
+                    locationsDiv.appendChild(locationItem);
+                });
+            } else {
+                locationsDiv.innerHTML = '<p>No locations in this area.</p>';
+            }
+        }
+
+
+        function openAddLocationPanel() {
+            editingLocationId = null;
+            document.getElementById('locationId').value = '';
+            document.getElementById('locationDescription').value = '';
+            document.getElementById('locationPanel').style.display = 'block';
+        }
+
+        function closeAddLocationPanel() {
+            document.getElementById('locationPanel').style.display = 'none';
+            editingLocationId = null;
+        }
+
+        function saveLocationToArea() {
+            const locationId = document.getElementById('locationId').value.trim();
+            const description = document.getElementById('locationDescription').value.trim();
+
+            if (!locationId) {
+                displayError("Location ID cannot be empty.");
+                return;
+            }
+
+            if (editingLocationId) {
+                const index = currentAreaLocations.findIndex(loc => loc.id === editingLocationId);
+                if (index > -1) {
+                    currentAreaLocations[index] = { id: locationId, description: description };
+                }
+            } else {
+                const existingLocation = currentAreaLocations.find(loc => loc.id === locationId);
+                if (existingLocation) {
+                    displayError(`Location with ID "${locationId}" already exists in this area.`);
+                    return;
+                }
+                currentAreaLocations.push({ id: locationId, description: description });
+            }
+
+            hideError();
+            displayAreaLocations();
+            closeAddLocationPanel();
+        }
+
+
+
+        function removeAreaLocation(locationId) {
+            if (confirm(`Are you sure you want to remove location "${locationId}"?`)) {
+                const index = currentAreaLocations.findIndex(loc => loc.id === locationId);
+                if (index > -1) {
+                    currentAreaLocations.splice(index, 1);
+                    displayAreaLocations();
+                }
+            }
+        }
+
+        function displayError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error-message').style.display = 'none';
+        }
+
+        // Function to load JSON data
+        function loadJSON(callback) {
+            fetch('map.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    callback(data);
+                })
+                .catch(error => {
+                    displayError("Error loading JSON: " + error.message);
+                    callback(null); // Pass null to callback to indicate error
+                });
+        }
+
+        // Initialize
+        loadJSON(function(data) {
+            if (data) {
+                jsonData = data; // Assign the loaded data
+                displayAreas();
+                prepareAddArea();
+            } else {
+                // Handle error case - the error message should already be displayed by loadJSON
+            }
+        });
+
+        function saveToFile() {
+            const dataStr = JSON.stringify(jsonData, null, 2); // Pretty print JSON
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'map.json'; // Suggested filename
+            document.body.appendChild(a); // Append, trigger, and remove
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url); // Clean up the URL object
+        }
+    </script>
+    <a href="panels.html" class="w-full">
+      <button class="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-teal-500 text-white font-semibold text-lg
+                 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300
+                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
+                 flex items-center justify-center">
+              Panel Central
+      </button>
+  </a>
+</body>
+</html>
