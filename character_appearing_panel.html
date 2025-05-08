@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Editor - Dark Theme with ConditionSystem (Imported, Fixed)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for better readability and structure */
+        .section-title {
+            /* Keep some Tailwind for consistent heading style */
+            @apply text-lg font-semibold mt-4 mb-2 border-b pb-1;
+            border-color: #555; /* Darker border for dark theme */
+        }
+        .subsection-title {
+            /* Keep some Tailwind for consistent heading style */
+            @apply text-base font-medium mt-3 mb-1 border-b pb-0.5 ml-4;
+             border-color: #666; /* Darker border for dark theme */
+        }
+        .field-label {
+            /* Keep some Tailwind for consistent label style */
+            @apply block text-sm text-gray-300 mb-1; /* Lighter text for dark theme */
+            font-weight: bold; /* Ensure user's bold is applied */
+        }
+
+        /* User-provided styles */
+        .panel, .action-list-container {
+            border: 1px solid #555; /* Darker border */
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            background-color: #2d3748; /* Dark background color */
+            color: #e2e8f0; /* Light text color */
+        }
+        .panel h2, .action-list-container h2 { margin-top: 0; }
+        .field-group { margin-bottom: 10px; }
+        .field-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        /* Apply user's styles directly to input and select */
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+            border: 1px solid #555; /* Darker border */
+            border-radius: 4px;
+            /* Override conflicting Tailwind styles */
+            box-shadow: none;
+            focus:ring-0 focus:border-gray-400; /* Dark theme focus ring */
+            background-color: #4a5568; /* Darker input background */
+            color: #e2e8f0; /* Light text color */
+        }
+        .conditions, .results { margin-top: 5px; }
+        .item-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .item-row select, .item-row input { margin-right: 5px; }
+        .item-row button { margin-left: auto; }
+        #actionList { list-style: none; padding: 0; }
+        #actionList li { padding: 8px; border-bottom: 1px solid #444; display: flex; justify-content: space-between; } /* Darker border */
+        /* Apply user's styles directly to button */
+        button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px; /* Added for better look */
+            cursor: pointer;
+            /* Default button style, can be overridden by specific classes */
+        }
+
+        /* Dark body background and light text */
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #1a202c; color: #e2e8f0; }
+        #error-message {
+            color: #fca5a5; /* Lighter red for dark theme */
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #fca5a5; /* Lighter red border */
+            background-color: #450a0a; /* Darker background for error */
+        }
+
+        /* Adjusting some Tailwind classes to integrate with new styles */
+        .container {
+             margin: 20px auto; /* Center with margin */
+             background-color: #2d3748; /* Dark container background */
+             padding: 20px; /* Adjust padding */
+             border-radius: 8px; /* Keep rounded corners */
+             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Darker shadow */
+             color: #e2e8f0; /* Set text color for content inside the container */
+             max-width: 800px; /* Added max-width for better readability on large screens */
+        }
+
+        /* Specific button styles using user's button base */
+         .add-button {
+             background-color: #5a67d8; /* Indigo 500 */
+             color: white;
+             margin-top: 10px; /* Adjust margin */
+             display: inline-flex; /* Keep inline-flex behavior */
+             align-items: center;
+         }
+          .add-button:hover {
+              background-color: #4c51bf; /* Indigo 600 */
+          }
+
+         .remove-button {
+              background-color: transparent;
+              color: #f87171; /* Red 400 */
+              padding: 5px; /* Adjust padding */
+         }
+         .remove-button:hover {
+             color: #ef4444; /* Red 500 */
+         }
+
+         /* Adjust array item input width */
+         .array-item input {
+             flex-grow: 1; /* Allow input to grow */
+             margin-right: 5px; /* Keep some margin */
+         }
+
+         /* Adjust location ID input width */
+         .location-id-input {
+             width: auto; /* Allow width to be determined by content */
+             display: inline-block; /* Make it inline */
+             background-color: #4a5568; /* Darker input background */
+             color: #e2e8f0; /* Light text color */
+         }
+
+         /* Style for the output JSON block */
+         #output-json {
+             background-color: #1f2937; /* Keep existing dark background */
+             color: #f9fafb; /* Keep existing light text */
+             padding: 1rem;
+             border-radius: 0.25rem;
+             font-size: 0.875rem; /* text-sm */
+             overflow: auto;
+             max-height: 400px;
+             white-space: pre-wrap; /* Ensure long lines wrap */
+             word-wrap: break-word;
+             border: 1px solid #4a5568; /* Add a border */
+         }
+
+         /* Style for the inner location divs */
+         .locations-container > div {
+             background-color: #4a5568; /* Darker background for inner divs */
+             border-color: #666; /* Darker border */
+             color: #e2e8f0; /* Light text */
+         }
+
+         /* Style for condition groups */
+         .condition-group {
+             border-color: #666; /* Darker border */
+             background-color: #4a5568; /* Darker background */
+             color: #e2e8f0; /* Light text */
+         }
+
+         /* Style for condition items */
+         .condition-item label {
+             color: #e2e8f0; /* Light text */
+         }
+         .condition-item input {
+             background-color: #667eea; /* Example: a slightly different dark color for inputs */
+             color: #fff;
+             border-color: #5a67d8;
+         }
+
+         /* Styles for the new condition UI elements from conditions.js */
+         .condition-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+         }
+         .condition-row select, .condition-row input {
+             margin-right: 5px;
+             flex-grow: 1;
+         }
+         .condition-row button {
+             margin-left: auto;
+         }
+         .condition-relation {
+             margin: 5px 0;
+             text-align: center;
+         }
+         .condition-relation select {
+             width: auto; /* Allow select to be smaller */
+             display: inline-block;
+         }
+         .add-condition-btn {
+             /* Inherits base button styles */
+             margin-top: 10px;
+         }
+
+
+    </style>
+    <script src="conditions.js" type="module"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="text-2xl font-bold mb-6" style="color: #e2e8f0;">JSON Data Editor</h1>
+
+        <div id="editor-form">
+            <div id="characters-section" class="panel">
+                <h2>Characters</h2>
+                <div id="characters-container">
+                    </div>
+                <button id="add-character-button" class="add-button">Add Character</button>
+            </div>
+
+            <div id="global-conditions-section" class="panel">
+                <h2>Global Conditions</h2>
+                <div id="global-conditions-container" class="ml-4">
+                    </div>
+            </div>
+
+            <div id="default-location-section" class="panel">
+                <h2>Default Location</h2>
+                <div class="field-group ml-4">
+                    <label for="default-location" class="field-label">Location ID:</label>
+                    <input type="text" id="default-location">
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <button id="generate-json-button" class="add-button">Generate JSON</button>
+            <pre id="output-json"></pre>
+        </div>
+    </div>
+
+    <script type="module"> // Also make the main script a module to use imported classes
+        import { ConditionSystem } from './conditions.js'; // Import the class
+
+        const initialJsonString = `{
+            "characters": [
+                {
+                    "id": "hero",
+                    "name": "Anya",
+                    "baseSprite": "images/anya_default.png",
+                    "locations": {
+                        "home": {
+                            "sprite": "images/anya_home.png",
+                            "conditions": {
+                                "time_of_day": "morning",
+                                "has_item": "book",
+                                "stat_min": {
+                                    "intelligence": 10
+                                }
+                            }
+                        },
+                        "school": {
+                            "sprite": "images/anya_school.png",
+                            "conditions": {
+                                "time_of_day": "day",
+                                "has_status": "studying"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "friend",
+                    "name": "Damian",
+                    "baseSprite": "images/damian_default.png",
+                    "locations": {
+                        "school": {
+                            "sprite": "images/damian_school.png",
+                            "conditions": {}
+                        }
+                    }
+                }
+            ],
+            "globalConditions": {
+                "timeOfDay": ["morning", "day", "evening", "night"],
+                "inventory": ["book", "peanuts"],
+                "faction_standing_levels": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            },
+            "defaultLocation": "home"
+        }`;
+
+        let jsonData = JSON.parse(initialJsonString);
+
+        const charactersContainer = document.getElementById('characters-container');
+        const globalConditionsContainer = document.getElementById('global-conditions-container');
+        const defaultLocationInput = document.getElementById('default-location');
+        const addCharacterButton = document.getElementById('add-character-button');
+        const generateJsonButton = document.getElementById('generate-json-button');
+        const outputJsonPre = document.getElementById('output-json');
+
+        // ConditionSystem is now available via import
+
+
+        // Function to render the JSON data into the form
+        function renderJson(data) {
+            // Clear existing content
+            charactersContainer.innerHTML = '';
+            globalConditionsContainer.innerHTML = '';
+
+            // Render Characters
+            data.characters.forEach((character, charIndex) => {
+                const characterDiv = document.createElement('div');
+                characterDiv.classList.add('panel'); // Use the panel class
+                characterDiv.innerHTML = `
+                    <h3 class="subsection-title">Character ${charIndex + 1}</h3>
+                    <div class="field-group">
+                        <label class="field-label">ID:</label>
+                        <input type="text" class="character-id" value="${character.id}">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Name:</label>
+                        <input type="text" class="character-name" value="${character.name}">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Base Sprite:</label>
+                        <input type="text" class="character-baseSprite" value="${character.baseSprite}">
+                    </div>
+                    <div class="mt-4">
+                        <h4 class="subsection-title">Locations</h4>
+                        <div class="locations-container ml-4">
+                            </div>
+                         <button class="add-location-button add-button" data-char-index="${charIndex}">Add Location</button>
+                    </div>
+                     <button class="remove-character-button remove-button mt-4" data-char-index="${charIndex}">Remove Character</button>
+                `;
+
+                const locationsContainer = characterDiv.querySelector('.locations-container');
+                for (const locationId in character.locations) {
+                    const location = character.locations[locationId];
+                    const locationDiv = document.createElement('div');
+                    locationDiv.classList.add('border', 'p-3', 'rounded-md', 'mb-3', 'bg-white'); // Keep some base tailwind
+                    locationDiv.innerHTML = `
+                        <h5 class="text-base font-medium mb-2">Location: <input type="text" class="location-id-input inline-block w-auto" value="${locationId}"></h5>
+                        <div class="field-group">
+                            <label class="field-label">Sprite:</label>
+                            <input type="text" class="location-sprite" value="${location.sprite}">
+                        </div>
+                        <div class="conditions mt-3">
+                            <h6 class="text-sm font-medium mb-1">Conditions:</h6>
+                            <div class="conditions-container ml-4">
+                                </div>
+                        </div>
+                         <button class="remove-location-button remove-button mt-2" data-char-index="${charIndex}" data-location-id="${locationId}">Remove Location</button>
+                    `;
+
+                    const conditionsContainer = locationDiv.querySelector('.conditions-container');
+
+                    // Old rendering logic for conditions (adapted to use ConditionSystem methods):
+                    for (const conditionType in location.conditions) {
+                        const conditionValue = location.conditions[conditionType];
+
+                        // If conditionType is stat_min, we need special handling
+                        if (conditionType === 'stat_min') {
+                            const statMinObj = conditionValue;
+                             const conditionGroupDiv = document.createElement('div');
+                             conditionGroupDiv.classList.add('condition-group');
+                             conditionGroupDiv.innerHTML = `
+                                 <h6 class="text-sm font-medium mb-1">${conditionType}:</h6>
+                                 <div class="ml-2 stat-min-container">
+                                     </div>
+                                  <button class="add-stat-min-button add-button" data-condition-type="${conditionType}">Add Stat</button>
+                             `;
+                              const statMinContainer = conditionGroupDiv.querySelector('.stat-min-container');
+                              for(const stat in statMinObj) {
+                                  // Use ConditionSystem's method to add the stat item row
+                                  ConditionSystem.addStatMinItem(statMinContainer, stat, statMinObj[stat]);
+                              }
+                             conditionGroupDiv.innerHTML += `<button class="remove-condition-type-button remove-button mt-2" data-condition-type="${conditionType}">Remove ${conditionType}</button>`;
+                             conditionsContainer.appendChild(conditionGroupDiv);
+
+                        } else {
+                            // For simple key-value conditions
+                            const conditionDiv = document.createElement('div');
+                            conditionDiv.classList.add('condition-group'); // Wrap in group for consistency
+                            conditionDiv.innerHTML = `
+                                <div class="condition-item">
+                                    <label>${conditionType}:</label>
+                                    <input type="text" class="condition-value" value="${conditionValue}" data-condition-type="${conditionType}">
+                                </div>
+                                <button class="remove-condition-type-button remove-button mt-2" data-condition-type="${conditionType}">Remove ${conditionType}</button>
+                            `;
+                             conditionsContainer.appendChild(conditionDiv);
+                        }
+                    }
+
+                    // Add the "Add Condition Type" button at the end of the conditions container
+                    const addConditionButton = document.createElement('button');
+                    addConditionButton.classList.add('add-button', 'mt-2');
+                    addConditionButton.textContent = 'Add Condition Type';
+                    addConditionButton.addEventListener('click', () => {
+                        const newConditionType = prompt("Enter new condition type (e.g., has_status, is_near):");
+                        if (newConditionType) {
+                            // Add a basic input for the new condition type
+                            const newConditionDiv = document.createElement('div');
+                            newConditionDiv.classList.add('condition-group');
+                            newConditionDiv.innerHTML = `
+                               <div class="condition-item">
+                                   <label>${newConditionType}:</label>
+                                   <input type="text" class="condition-value" value="" data-condition-type="${newConditionType}">
+                               </div>
+                                <button class="remove-condition-type-button remove-button mt-2" data-condition-type="${newConditionType}">Remove ${newConditionType}</button>
+                            `;
+                            conditionsContainer.appendChild(newConditionDiv);
+                            addEventListeners(); // Re-add listeners for the new elements
+                        }
+                    });
+                    conditionsContainer.appendChild(addConditionButton);
+
+
+                    locationsContainer.appendChild(locationDiv);
+                }
+
+                charactersContainer.appendChild(characterDiv);
+            });
+
+            // Render Global Conditions
+            for (const conditionType in data.globalConditions) {
+                const globalConditionDiv = document.createElement('div');
+                globalConditionDiv.classList.add('mb-4'); // Keep some base tailwind
+                globalConditionDiv.innerHTML = `
+                    <h3 class="subsection-title">${conditionType}</h3>
+                    <div class="global-condition-items ml-4" data-condition-type="${conditionType}">
+                        </div>
+                     <button class="add-global-condition-button add-button" data-condition-type="${conditionType}">Add Item</button>
+                `;
+
+                const itemsContainer = globalConditionDiv.querySelector('.global-condition-items');
+                data.globalConditions[conditionType].forEach(item => {
+                    // Use ConditionSystem to create array items
+                    ConditionSystem.createConditionRow(itemsContainer, item);
+                });
+
+                globalConditionsContainer.appendChild(globalConditionDiv);
+            }
+
+
+            // Render Default Location
+            defaultLocationInput.value = data.defaultLocation;
+
+            // Add event listeners after rendering
+            addEventListeners();
+        }
+
+
+        // Function to collect data from the form
+        function collectJson() {
+            const newJsonData = {
+                characters: [],
+                globalConditions: {},
+                defaultLocation: defaultLocationInput.value
+            };
+
+            // Collect Characters
+            charactersContainer.querySelectorAll('.panel').forEach(characterDiv => { // Select using .panel
+                const character = {
+                    id: characterDiv.querySelector('.character-id').value,
+                    name: characterDiv.querySelector('.character-name').value,
+                    baseSprite: characterDiv.querySelector('.character-baseSprite').value,
+                    locations: {}
+                };
+
+                characterDiv.querySelectorAll('.locations-container > div').forEach(locationDiv => { // Select the inner location divs
+                    const locationIdInput = locationDiv.querySelector('.location-id-input');
+                    const locationId = locationIdInput.value;
+                    const location = {
+                        sprite: locationDiv.querySelector('.location-sprite').value,
+                        // Use ConditionSystem to get conditions - It returns an array
+                        // We need to convert the array back to the original object structure
+                        conditions: {} // Initialize conditions object
+                    };
+
+                    locationDiv.querySelectorAll('.conditions-container > .condition-group').forEach(conditionGroupDiv => {
+                        const conditionType = conditionGroupDiv.querySelector('[data-condition-type]').dataset.conditionType;
+
+                        if (conditionType === 'stat_min') {
+                            const statMin = {};
+                            conditionGroupDiv.querySelectorAll('.item-row').forEach(statItemDiv => {
+                                const statName = statItemDiv.querySelector('.stat-name').value;
+                                const statValue = parseInt(statItemDiv.querySelector('.stat-value').value, 10);
+                                if (statName) {
+                                    statMin[statName] = statValue;
+                                }
+                            });
+                            if (Object.keys(statMin).length > 0) {
+                                location.conditions[conditionType] = statMin;
+                            }
+                        } else {
+                            const conditionValueInput = conditionGroupDiv.querySelector('.condition-value');
+                            if(conditionValueInput) {
+                                const conditionValue = conditionValueInput.value;
+                                if (conditionValue) {
+                                    location.conditions[conditionType] = conditionValue;
+                                }
+                            }
+                        }
+                    });
+
+
+                    if (locationId) {
+                         character.locations[locationId] = location;
+                    }
+                });
+
+                newJsonData.characters.push(character);
+            });
+
+            // Collect Global Conditions
+            globalConditionsContainer.querySelectorAll('.global-condition-items').forEach(itemsContainer => {
+                const conditionType = itemsContainer.dataset.conditionType;
+                const items = [];
+                itemsContainer.querySelectorAll('.item-row input').forEach(input => { // Select using item-row
+                    items.push(input.value);
+                });
+                newJsonData.globalConditions[conditionType] = items;
+            });
+
+
+            return newJsonData;
+        }
+
+        // Function to add all event listeners
+        function addEventListeners() {
+            // Add Character Button
+            addCharacterButton.onclick = () => {
+                jsonData.characters.push({
+                    id: `new_character_${jsonData.characters.length + 1}`,
+                    name: 'New Character',
+                    baseSprite: '',
+                    locations: {}
+                });
+                renderJson(jsonData);
+            };
+
+            // Remove Character Buttons
+            document.querySelectorAll('.remove-character-button').forEach(button => {
+                button.onclick = (event) => {
+                    const index = parseInt(event.target.dataset.charIndex, 10);
+                    jsonData.characters.splice(index, 1);
+                    renderJson(jsonData);
+                };
+            });
+
+             // Add Location Buttons
+            document.querySelectorAll('.add-location-button').forEach(button => {
+                button.onclick = (event) => {
+                    const charIndex = parseInt(event.target.dataset.charIndex, 10);
+                    const newLocationId = prompt("Enter new location ID:");
+                    if (newLocationId && !jsonData.characters[charIndex].locations[newLocationId]) {
+                        jsonData.characters[charIndex].locations[newLocationId] = {
+                            sprite: '',
+                            conditions: {}
+                        };
+                        renderJson(jsonData);
+                    } else if (newLocationId) {
+                        alert("Location ID already exists for this character.");
+                    }
+                };
+            });
+
+            // Remove Location Buttons
+             document.querySelectorAll('.remove-location-button').forEach(button => {
+                button.onclick = (event) => {
+                    const charIndex = parseInt(event.target.dataset.charIndex, 10);
+                    const locationIdToRemove = event.target.dataset.locationId;
+                    delete jsonData.characters[charIndex].locations[locationIdToRemove];
+                    renderJson(jsonData);
+                };
+            });
+
+             // Add Global Condition Item buttons
+            document.querySelectorAll('.add-global-condition-button').forEach(button => {
+                button.onclick = (event) => {
+                    const conditionType = event.target.dataset.conditionType;
+                    const itemsContainer = event.target.previousElementSibling; // Get the container before the button
+                    // Use ConditionSystem to add array items
+                    ConditionSystem.createConditionRow(itemsContainer);
+                };
+            });
+
+            // Remove Condition Type buttons (delegated)
+            document.querySelectorAll('.conditions-container').forEach(container => {
+                 container.addEventListener('click', (event) => {
+                     if (event.target.classList.contains('remove-condition-type-button')) {
+                         const conditionGroupDiv = event.target.closest('.condition-group');
+                         if (conditionGroupDiv) {
+                             conditionGroupDiv.remove();
+                             // Re-render might be needed depending on complexity, but for simple removal, this is often enough.
+                             // renderJson(collectJson()); // Uncomment if removal needs a full re-render
+                         }
+                     }
+                 });
+            });
+
+
+            // Add Stat Min buttons (delegated)
+             document.querySelectorAll('.add-stat-min-button').forEach(button => {
+                 button.onclick = (event) => {
+                     const statMinContainer = event.target.previousElementSibling; // Get the container before the button
+                     // Use ConditionSystem to add stat min items
+                     ConditionSystem.addStatMinItem(statMinContainer);
+                 };
+             });
+        }
+
+
+        // Generate JSON Button
+        generateJsonButton.onclick = () => {
+            const updatedJson = collectJson();
+            outputJsonPre.textContent = JSON.stringify(updatedJson, null, 2);
+        };
+
+        // Initial render
+        renderJson(jsonData);
+
+    </script>
+
+</body>
+</html>

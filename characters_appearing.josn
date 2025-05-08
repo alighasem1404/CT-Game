@@ -1,0 +1,45 @@
+{
+  "characters": [
+    {
+      "id": "hero",
+      "name": "Anya",
+      "baseSprite": "images/anya_default.png",
+      "locations": {
+        "home": {
+          "sprite": "images/anya_home.png",
+          "conditions": {
+            "time_of_day": "morning",
+            "has_item": "book",
+            "stat_min": {
+              "intelligence": 10
+            }
+          }
+        },
+        "school": {
+          "sprite": "images/anya_school.png",
+          "conditions": {
+            "time_of_day": "day",
+            "has_status": "studying"
+          }
+        }
+      }
+    },
+    {
+      "id": "friend",
+      "name": "Damian",
+      "baseSprite": "images/damian_default.png",
+      "locations": {
+        "school": {
+          "sprite": "images/damian_school.png",
+          "conditions": {}
+        }
+      }
+    }
+  ],
+  "globalConditions": {
+    "timeOfDay": ["morning", "day", "evening", "night"],
+    "inventory": ["book", "peanuts"],
+    "faction_standing_levels": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  },
+  "defaultLocation": "home"
+}

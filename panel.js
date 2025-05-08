@@ -1,4 +1,4 @@
-import { ConditionSystem } from './logic/conditions.js';
+import { ConditionSystem } from './conditions.js';
 import { character } from './logic/mainCharacter.js';
 
 const primaryOptions = ["Work","Rest","Socialise","Explore","Craft","Train"];
