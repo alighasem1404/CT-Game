@@ -260,85 +260,7 @@
 
 
     <script>
-        let jsonData = {
-            "map": {
-                "areas": {
-                    "market": {
-                        "description": "The trade hub full of shops and guilds.",
-                        "connections": [
-                            {
-                                "to": "slums",
-                                "conditions": [
-                                    { "stat_min": { "STR": 6 } }
-                                ]
-                            },
-                            {
-                                "to": "far_north",
-                                "conditions": [
-                                    { "has_item": "ColdCoat" }
-                                ]
-                            }
-                        ],
-                        "locations": [
-                            {
-                                "id": "blacksmith",
-                                "description": "A forge for crafting weapons."
-                            },
-                            {
-                                "id": "tavern",
-                                "description": "A cozy tavern where locals share news and drink."
-                            },
-                            {
-                                "id": "main_square",
-                                "description": "The central gathering place of the market district."
-                            }
-                        ]
-                    },
-                    "mine": {
-                        "description": ""
-                    },
-                    "slums": {
-                        "description": "The crowded, poorer quarter of town.",
-                        "connections": [
-                            {
-                                "to": "market",
-                                "conditions": [
-                                    { "stat_min": { "STR": 6 } }
-                                ]
-                            }
-                        ],
-                        "locations": [
-                            {
-                                "id": "house",
-                                "description": "A modest dwelling, its walls barely standing."
-                            },
-                            {
-                                "id": "old_bridge",
-                                "description": "A rickety wooden bridge spanning a narrow gutter."
-                            },
-                            {
-                                "id": "bar",
-                                "description": "A dingy bar where slum residents drown their sorrows."
-                            }
-                        ]
-                    },
-                    "far_north": {
-                        "description": "The frozen wastes beyond the town.",
-                        "connections": [
-                            {
-                                "to": "market"
-                            }
-                        ],
-                        "locations": [
-                            {
-                                "id": "ice_fields",
-                                "description": "Vast plains of ice and snow."
-                            }
-                        ]
-                    }
-                }
-            }
-        };
+        
 
         let currentAreaId = null;
         let currentAreaLocations = [];
@@ -414,7 +336,7 @@
 
             const valueLabel = document.createElement('label');
             valueLabel.textContent = 'Value:';
-            const valueInput = documentcreateElement('input');
+            const valueInput = document.createElement('input');
             valueInput.type = 'text';
             valueInput.value = typeof conditionValue === 'object' ? JSON.stringify(conditionValue) : conditionValue;
 
@@ -447,7 +369,7 @@
                 const option = document.createElement('option');
                 option.value = areaId;
                 option.textContent = areaId;
-                if(connection.to === areaId){
+                if (connection.to === areaId) {
                     option.selected = true;
                 }
                 toSelect.appendChild(option);
@@ -460,7 +382,8 @@
             conditionsDiv.appendChild(conditionsHeader);
             if (connection.conditions && connection.conditions.length > 0) {
                 connection.conditions.forEach(condition => {
-                    conditionsDiv.appendChild(createConditionElement(condition));
+                    const conditionElement = createConditionElement(condition); // Corrected line
+                    conditionsDiv.appendChild(conditionElement);
                 });
             }
             const addConditionButton = document.createElement('button');
@@ -521,13 +444,13 @@
                             // Keep as string if not valid JSON
                         }
                         conditions.push({ [type]: value });
+                    }
+                });
+
+                if (toSelect && toSelect.value.trim()) {
+                    connections.push({ to: toSelect.value.trim(), conditions: conditions });
                 }
             });
-
-            if (toSelect && toSelect.value.trim()) {
-                connections.push({ to: toSelect.value.trim(), conditions: conditions });
-            }
-        });
 
             if (currentAreaId) {
                 jsonData.map.areas[currentAreaId].description = description;
@@ -565,6 +488,8 @@
                     locationItem.innerHTML = `
                         <label>ID:</label><span>${location.id}</span>
                         <label>Description:</label><span>${location.description}</span>
+                         <button class="edit-location-btn" onclick="editAreaLocation('${location.id}')">Edit</button>
+                        <button class="remove-location-btn" onclick="removeAreaLocation('${location.id}')">Remove</button>
                     `;
                     locationsDiv.appendChild(locationItem);
                 });
@@ -614,6 +539,15 @@
             closeAddLocationPanel();
         }
 
+        function editAreaLocation(locationId) {
+            editingLocationId = locationId;
+            const location = currentAreaLocations.find(loc => loc.id === locationId);
+            if (location) {
+                document.getElementById('locationId').value = location.id;
+                document.getElementById('locationDescription').value = location.description;
+                document.getElementById('locationPanel').style.display = 'block';
+            }
+        }
 
 
         function removeAreaLocation(locationId) {
@@ -655,7 +589,7 @@
         }
 
         // Initialize
-        loadJSON(function(data) {
+        loadJSON(function (data) {
             if (data) {
                 jsonData = data; // Assign the loaded data
                 displayAreas();
@@ -678,13 +612,5 @@
             URL.revokeObjectURL(url); // Clean up the URL object
         }
     </script>
-    <a href="panels.html" class="w-full">
-      <button class="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-teal-500 text-white font-semibold text-lg
-                 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300
-                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
-                 flex items-center justify-center">
-              Panel Central
-      </button>
-  </a>
 </body>
 </html>
