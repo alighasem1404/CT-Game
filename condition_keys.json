@@ -1,0 +1,81 @@
+{
+    "stat":[
+        "max_energy",
+        "energy",
+        "max_health",
+        "health",
+        "copper",
+        "silver",
+        "gold",
+        "strength",
+        "strength_progress",
+        "dexterity",
+        "dexterity_progress",
+        "constitution",
+        "constitution_progress",
+        "intelligence",
+        "intelligence_progress",
+        "charisma",
+        "charisma_progress",
+        "wisdom",
+        "wisdom_progress",
+        "food",
+        "drink",
+        "reputation"
+    ],
+    "items":[
+        "Sword",
+        "Shield",
+        "Potion",
+        "Bow",
+        "Arrow",
+        "Armor",
+        "Helmet",
+        "Pickaxe",
+        "Healing Herb",
+        "Magic Staff"
+    ],
+    "quests":[
+
+    ],
+    "events":[
+
+    ],
+    "factions":[
+
+    ],
+    "NPCs":[
+
+    ],
+    "ttime_of_day":[
+
+    ],
+    "weather":[
+
+    ],
+    "Locations":[
+        "mine",
+        "blacksmith",
+        "tavern"
+
+    ],
+    "status":[
+
+    ],
+    "classes":[
+
+    ],
+    "race":[
+
+    ]
+
+
+
+
+
+
+
+
+}
+
+   

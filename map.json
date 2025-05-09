@@ -8,9 +8,9 @@
             "to": "slums",
             "conditions": [
               {
-                "stat_min": {
-                  "STR": 6
-                }
+                "type": "stat_min",
+                "key": "strength",
+                "value": 6
               }
             ]
           },
@@ -18,7 +18,9 @@
             "to": "far_north",
             "conditions": [
               {
-                "has_item": "ColdCoat"
+                "type": "has_item",
+                "key": "Bow",
+                "value": true
               }
             ]
           }
@@ -45,9 +47,9 @@
             "to": "market",
             "conditions": [
               {
-                "stat_min": {
-                  "STR": 6
-                }
+                "type": "stat_min",
+                "key": "strength",
+                "value": 6
               }
             ]
           }
@@ -71,7 +73,14 @@
         "description": "The frozen wastes beyond the town.",
         "connections": [
           {
-            "to": "market"
+            "to": "market",
+            "conditions": [
+              {
+                "type": "is_area_visited",
+                "key": "blacksmith",
+                "value": true
+              }
+            ]
           }
         ],
         "locations": [
@@ -86,7 +95,13 @@
         "connections": [
           {
             "to": "slums",
-            "conditions": []
+            "conditions": [
+              {
+                "type": "has_item",
+                "key": "Pickaxe",
+                "value": true
+              }
+            ]
           }
         ],
         "locations": [

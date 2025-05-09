@@ -1,293 +1,182 @@
+//  Define conditionTypes directly in the code
+const conditionTypes = {
+    // Basic Conditions
+    stat_min: { label: 'Stat Minimum', format: 'STAT:value', key: 'stat' },
+    stat_max: { label: 'Stat Maximum', format: 'STAT:value', key: 'stat' },
+    has_item: { label: 'Has Item', format: 'true/false', key: 'items' },
+    item_count: { label: 'Item Count', format: 'item:count', key: 'items' },
+    equipped_item: { label: 'Equipped Item', format: 'true/false', key: 'items' },
+    // Quest & Story
+    quest_completed: { label: 'Quest Completed', format: 'true/false', key: 'quests' },
+    quest_started: { label: 'Quest Started', format: 'true/false', key: 'quests' },
+    event_triggered: { label: 'Event Triggered', format: 'true/false', key: 'events' },
+    // Faction & NPCs
+    faction_standing: { label: 'Faction Standing', format: 'faction:value', key: 'factions' },
+    has_companion: { label: 'Has Companion', format: 'true/false', key: 'NPCs' },
+    // Time & World
+    time_of_day: { label: 'Time of Day', format: 'true/false', key: 'time_of_day' },
+    is_weather: { label: 'Weather', format: 'true/false', key: 'weather' },
+    is_area_visited: { label: 'Area Visited', format: 'true/false', key: 'Locations' },
+    // Player State
+    has_status: { label: 'Has Status', format: 'true/false', key: 'status' },
+    is_class: { label: 'Is Class', format: 'true/false', key: 'classes' },
+    is_race: { label: 'Is Race', format: 'true/false', key: 'race' }
+};
 
-export class ConditionSystem {
-    static conditionTypes = {
-      // Basic Conditions
-      stat_min: { label: 'Stat Minimum', format: 'STAT:value' },
-      stat_max: { label: 'Stat Maximum', format: 'STAT:value' },
-      has_item: { label: 'Has Item', format: 'item_name' },
-      missing_item: { label: 'Missing Item', format: 'item_name' },
-      item_count: { label: 'Item Count', format: 'item:count' },
-      equipped_item: { label: 'Equipped Item', format: 'item_name' },
-  
-      // Quest & Story
-      quest_completed: { label: 'Quest Completed', format: 'quest_id' },
-      quest_started: { label: 'Quest Started', format: 'quest_id' },
-      event_triggered: { label: 'Event Triggered', format: 'event_id' },
-  
-      // Faction & NPCs
-      faction_standing: { label: 'Faction Standing', format: 'faction:value' },
-      has_companion: { label: 'Has Companion', format: 'companion_name' },
-  
-      // Time & World
-      time_of_day: { label: 'Time of Day', format: 'day/night' },
-      is_weather: { label: 'Weather', format: 'weather_type' },
-      is_area_visited: { label: 'Area Visited', format: 'true/false' },
-  
-      // Player State
-      has_status: { label: 'Has Status', format: 'status_name' },
-      is_class: { label: 'Is Class', format: 'class_name' },
-      is_race: { label: 'Is Race', format: 'race_name' }
-    };
-  
-    /**
-     * Creates the UI for a condition group.
-     * @param {HTMLElement} container - The container element to add the condition UI to.
-     */
-    static createConditionUI(container) {
-      if (!container) {
-        console.error('Container element is required.');
-        return;
-      }
-  
-      const row = this.createConditionRow(container);
-      const relation = this.createRelationSelect();
-      const addBtn = document.createElement('button');
-      addBtn.className = 'add-condition-btn';
-      addBtn.textContent = '➕ Add Condition';
-  
-      container.appendChild(row);
-      container.appendChild(relation);
-      container.appendChild(addBtn);
-  
-      this.setupConditionHandlers(container);
+let conditionKeys = {}; // To store the loaded keys
+
+// Function to load condition keys from JSON file
+async function loadConditionKeys() {
+    try {
+        const keysResponse = await fetch('condition_keys.json');
+        if (!keysResponse.ok) {
+            throw new Error(`Failed to fetch condition keys: ${keysResponse.status}`);
+        }
+        conditionKeys = await keysResponse.json();
+        console.log('Condition keys loaded:', conditionKeys);
+        initializeUI(); // Call after
+    } catch (error) {
+        console.error('Error loading condition keys:', error);
+        const errorMessageElement = document.getElementById('error-message');
+        errorMessageElement.textContent = 'Failed to load condition keys.  Application may not function correctly.';
+        errorMessageElement.style.display = 'block';
+         initializeUI(); // still initialize
     }
-  
-    /**
-     * Creates a single condition row.
-     * @param {HTMLElement} container - The container element.
-     * @returns {HTMLElement} The created condition row element.
-     */
-    static createConditionRow(container) {
-      const row = document.createElement('div');
-      row.className = 'condition-row';
-  
-      const select = document.createElement('select');
-      select.className = 'condition-type';
-  
-      // Add condition groups (same as before)
-      const groups = {
-        'Basic Conditions': ['stat_min', 'stat_max', 'has_item', 'missing_item', 'item_count', 'equipped_item'],
-        'Quest & Story': ['quest_completed', 'quest_started', 'event_triggered'],
-        'Faction & NPCs': ['faction_standing', 'has_companion'],
-        'Time & World': ['time_of_day', 'is_weather', 'is_area_visited'],
-        'Player State': ['has_status', 'is_class', 'is_race']
-      };
-  
-      for (const [groupName, types] of Object.entries(groups)) {
-        const optgroup = document.createElement('optgroup');
-        optgroup.label = groupName;
-        types.forEach(type => {
-          const option = document.createElement('option');
-          option.value = type;
-          option.textContent = this.conditionTypes[type].label;
-          optgroup.appendChild(option);
-        });
-        select.appendChild(optgroup);
-      }
-  
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'condition-value';
-      input.placeholder = 'Value';
-  
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'remove-condition';
-      removeBtn.textContent = '❌';
-  
-      row.appendChild(select);
-      row.appendChild(input);
-      row.appendChild(removeBtn);
-      return row;
+}
+
+function createConditionInput(availableConditionTypes, loadedData = null) {
+    const container = document.createElement('div');
+
+    const typeLabel = document.createElement('label');
+    typeLabel.textContent = 'Condition Type:';
+    const typeSelect = document.createElement('select');
+    typeSelect.id = 'conditionType';
+
+    const defaultTypeOption = document.createElement('option');
+    defaultTypeOption.value = '';
+    defaultTypeOption.textContent = '-- Select Type --';
+    typeSelect.appendChild(defaultTypeOption);
+
+    for (const type in availableConditionTypes) {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = availableConditionTypes[type].label;
+        typeSelect.appendChild(option);
     }
-  
-    /**
-     * Creates the relation select dropdown (AND/OR).
-     * @returns {HTMLElement} The relation select element.
-     */
-    static createRelationSelect() {
-      const relation = document.createElement('div');
-      relation.className = 'condition-relation';
-      relation.innerHTML = `
-          <select class="relation-type">
-              <option value="and">AND</option>
-              <option value="or">OR</option>
-          </select>
-      `;
-      return relation;
-    }
-  
-    /**
-     * Sets up event handlers for adding and removing conditions.
-     * @param {HTMLElement} container - The main container for the conditions.
-     */
-    static setupConditionHandlers(container) {
-      const addBtn = container.querySelector('.add-condition-btn');
-      if (addBtn) { // Check if addBtn exists
-        addBtn.addEventListener('click', () => {
-          const row = this.createConditionRow(container);
-          const relation = this.createRelationSelect();
-          container.insertBefore(row, addBtn);
-          container.insertBefore(relation, addBtn);
-        });
-      }
-  
-      container.addEventListener('click', (e) => {
-        if (e.target.classList.contains('remove-condition')) {
-          const row = e.target.closest('.condition-row');
-          if (row) {
-            const relation = row.nextElementSibling;
-            if (relation && relation.classList.contains('condition-relation')) {
-              relation.remove();
+    container.appendChild(typeLabel);
+    container.appendChild(typeSelect);
+
+    const keyLabel = document.createElement('label');
+    keyLabel.textContent = 'Condition Key:';
+    const keySelect = document.createElement('select');
+    keySelect.id = 'conditionKey';
+
+    const defaultKeyOption = document.createElement('option');
+    defaultKeyOption.value = '';
+    defaultKeyOption.textContent = '-- Select Key --';
+    keySelect.appendChild(defaultKeyOption);
+
+    container.appendChild(keyLabel);
+    container.appendChild(keySelect);
+
+    const valueLabel = document.createElement('label');
+    valueLabel.textContent = 'Value:';
+    let valueInput = document.createElement('input'); // Declare valueInput with let
+    valueInput.type = 'text';
+    valueInput.id = 'conditionValue';
+    container.appendChild(valueLabel);
+    container.appendChild(valueInput);
+
+
+    typeSelect.addEventListener('change', () => {
+        const selectedType = typeSelect.value;
+        keySelect.innerHTML = '<option value="">-- Select Key --</option>';
+        valueInput.value = '';
+
+        if (selectedType && conditionTypes[selectedType]) {
+            // Populate the keySelect dropdown based on conditionKeys
+            const keysForType = conditionKeys[conditionTypes[selectedType].key];
+            if (keysForType) {
+                for (const key of keysForType) {
+                    const keyOption = document.createElement('option');
+                    keyOption.value = key;
+                    keyOption.textContent = key;
+                    keySelect.appendChild(keyOption);
+                }
             }
-            row.remove();
-          }
         }
-      });
-    }
-  
-    /**
-     * Retrieves the conditions from the given container.
-     * @param {HTMLElement} container - The container element.
-     * @returns {Array} An array of condition objects.
-     */
-    static getConditionsFromContainer(container) {
-      const conditions = [];
-      const rows = container.querySelectorAll('.condition-row');
-      const relations = container.querySelectorAll('.relation-type');
-  
-      rows.forEach((row, index) => {
-        const type = row.querySelector('.condition-type').value;
-        const value = row.querySelector('.condition-value').value;
-        const relation = index < relations.length ? relations[index].value : 'and';
-  
-        let condition = {};
-        switch (type) {
-          case 'stat_min':
-          case 'stat_max':
-            const [stat, val] = value.split(':');
-            condition = { [type]: { [stat]: parseInt(val, 10) } };
-            break;
-          case 'has_item':
-          case 'missing_item':
-          case 'equipped_item':
-          case 'has_companion':
-          case 'has_status':
-          case 'is_class':
-          case 'is_race':
-          case 'quest_completed':
-          case 'quest_started':
-          case 'event_triggered':
-          case 'time_of_day':
-          case 'is_weather':
-            condition = { [type]: value };
-            break;
-          case 'item_count':
-            const [item, count] = value.split(':');
-            condition = { item_count: { [item]: parseInt(count, 10) } };
-            break;
-          case 'faction_standing':
-            const [faction, standing] = value.split(':');
-            condition = { faction_standing: { [faction]: parseInt(standing, 10) } };
-            break;
-          case 'is_area_visited':
-            condition = { is_area_visited: value === 'true' };
-            break;
-          default:
-            break;
-        }
-  
-        if (Object.keys(condition).length > 0) { // only add if condition is not empty
-          if (index > 0) {
-            condition.relation = relation;
-          }
-          conditions.push(condition);
-        }
-      });
-      return conditions;
-    }
-  
-    /**
-     * Checks a single condition against a character object.
-     * @param {object} condition - The condition object to check.
-     * @param {object} character - The character object to check against.  Must have the methods/properties used in the checks.
-     * @returns {boolean} True if the condition is met, false otherwise.
-     */
-    static checkCondition(condition, character) {
-      const type = Object.keys(condition)[0];
-      const value = condition[type];
-  
-      switch (type) {
-        case 'stat_min':
-          return Object.entries(value).every(([stat, min]) =>
-            character.getStat(stat) >= min
-          );
-        case 'stat_max':
-          return Object.entries(value).every(([stat, max]) =>
-            character.getStat(stat) <= max
-          );
-        case 'has_item':
-          return character.inventory && character.inventory[value] > 0;
-        case 'missing_item':
-          return !character.inventory || character.inventory[value] <= 0;
-        case 'item_count':
-          return Object.entries(value).every(([item, count]) =>
-            character.inventory && character.inventory[item] >= count
-          );
-        case 'equipped_item':
-          return character.equipment && character.equipment.includes(value);
-        case 'quest_completed':
-          return character.completedQuests && character.completedQuests.includes(value);
-        case 'quest_started':
-          return character.activeQuests && character.activeQuests.includes(value);
-        case 'event_triggered':
-          return character.triggeredEvents && character.triggeredEvents.includes(value);
-        case 'faction_standing':
-          return Object.entries(value).every(([faction, standing]) =>
-            character.factions && character.factions[faction] >= standing
-          );
-        case 'has_companion':
-          return character.companions && character.companions.includes(value);
-        case 'time_of_day':
-          return character.currentTime === value;
-        case 'is_weather':
-          return character.currentWeather === value;
-        case 'is_area_visited':
-          return character.visitedAreas && character.visitedAreas.includes(value);
-        case 'has_status':
-          return character.statuses && character.statuses.includes(value);
-        case 'is_class':
-          return character.charClass === value;
-        case 'is_race':
-          return character.race === value;
-        default:
-          return false;
-      }
-    }
-  
-    /**
-     * Checks multiple conditions against a character object.
-     * @param {Array} conditions - An array of condition objects.
-     * @param {object} character - The character object to check against.
-     * @returns {boolean} True if all conditions are met, false otherwise.
-     */
-    static checkConditions(conditions, character) {
-      if (!conditions || conditions.length === 0) return true;
-  
-      let result = this.checkCondition(conditions[0], character);
-  
-      for (let i = 1; i < conditions.length; i++) {
-        const condition = conditions[i];
-        const relation = condition.relation || 'and';
-        const conditionResult = this.checkCondition(condition, character);
-  
-        if (relation === 'and') {
-          result = result && conditionResult;
+    });
+
+    keySelect.addEventListener('change', () => {
+        const selectedType = typeSelect.value;
+        const selectedKey = keySelect.value;
+
+        if (selectedType) {
+            const formatString = conditionTypes[selectedType].format;
+            if (formatString.includes('value') || formatString.includes('count')) {
+                valueInput.type = 'number';
+            } else if (formatString.includes('true/false')) {
+                const valueSelect = document.createElement('select');
+                valueSelect.id = 'conditionValue';
+                const trueOption = document.createElement('option');
+                trueOption.value = 'true';
+                trueOption.textContent = 'True';
+                const falseOption = document.createElement('option');
+                falseOption.value = 'false';
+                falseOption.textContent = 'False';
+                valueSelect.appendChild(trueOption);
+                valueSelect.appendChild(falseOption);
+                valueInput.parentNode.replaceChild(valueSelect, valueInput);
+                valueInput = valueSelect; // Reassign valueInput
+            } else {
+                valueInput.type = 'text';
+            }
         } else {
-          result = result || conditionResult;
+            valueInput.type = 'text';
         }
-      }
-      return result;
+    });
+
+    if (loadedData) {
+        if (loadedData.type && conditionTypes[loadedData.type]) {
+            typeSelect.value = loadedData.type;
+            const typeEvent = new Event('change');
+            typeSelect.dispatchEvent(typeEvent);
+
+            if (loadedData.key) {
+                keySelect.value = loadedData.key;
+                const keyEvent = new Event('change');
+                keySelect.dispatchEvent(keyEvent);
+
+                // Wait for the next tick to ensure the input type is set
+                setTimeout(() => {
+                    const valueInput = document.getElementById('conditionValue');
+                    if (valueInput) {
+                        const formatString = conditionTypes[loadedData.type].format;
+                        if (formatString.includes('true/false')) {
+                            // For true/false values, ensure we're working with a select element
+                            if (valueInput.tagName === 'SELECT') {
+                                valueInput.value = loadedData.value.toString();
+                            }
+                        } else if (formatString.includes('value') || formatString.includes('count')) {
+                            // For numeric values, ensure we're working with a number input
+                            if (valueInput.type === 'number') {
+                                valueInput.value = loadedData.value;
+                            }
+                        } else {
+                            // For other values, use as is
+                            valueInput.value = loadedData.value;
+                        }
+                    }
+                }, 0);
+            }
+        }
     }
-  }
-  
-  
+    return container;
+}
+
+function initializeUI() {
+    console.log('Conditions UI initialized');
+}
+
+// Load condition keys from JSON file when the script loads
+loadConditionKeys();

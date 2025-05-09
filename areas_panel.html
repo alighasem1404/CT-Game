@@ -258,14 +258,17 @@
     </div>
     <button id="saveButton" onclick="saveToFile()">Save to File</button>
 
-
+    <script src="conditions.js"></script>
     <script>
-        
-
         let currentAreaId = null;
         let currentAreaLocations = [];
         let editingLocationId = null;
+        let jsonData = { map: { areas: {} } };
 
+        // Initialize conditions when the page loads
+        window.addEventListener('load', function() {
+            loadConditionKeys();
+        });
 
         function displayAreas() {
             const areaList = document.getElementById('areaList');
@@ -319,37 +322,16 @@
         function createConditionElement(condition) {
             const conditionDiv = document.createElement('div');
             conditionDiv.classList.add('item-row');
-            const conditionType = Object.keys(condition)[0];
-            const conditionValue = condition[conditionType];
-
-            const typeLabel = document.createElement('label');
-            typeLabel.textContent = 'Type:';
-            const typeSelect = document.createElement('select');
-            const allowedTypes = ['stat_min', 'has_item'];
-            allowedTypes.forEach(type => {
-                const option = document.createElement('option');
-                option.value = type;
-                option.textContent = type;
-                option.selected = type === conditionType;
-                typeSelect.appendChild(option);
-            });
-
-            const valueLabel = document.createElement('label');
-            valueLabel.textContent = 'Value:';
-            const valueInput = document.createElement('input');
-            valueInput.type = 'text';
-            valueInput.value = typeof conditionValue === 'object' ? JSON.stringify(conditionValue) : conditionValue;
+            
+            // Use the createConditionInput function from conditions.js
+            const conditionInput = createConditionInput(conditionTypes, condition);
+            conditionDiv.appendChild(conditionInput);
 
             const removeButton = document.createElement('button');
             removeButton.textContent = 'Remove';
             removeButton.onclick = function () {
                 conditionDiv.remove();
             };
-
-            conditionDiv.appendChild(typeLabel);
-            conditionDiv.appendChild(typeSelect);
-            conditionDiv.appendChild(valueLabel);
-            conditionDiv.appendChild(valueInput);
             conditionDiv.appendChild(removeButton);
 
             return conditionDiv;
@@ -380,12 +362,14 @@
             const conditionsHeader = document.createElement('h3');
             conditionsHeader.textContent = 'Conditions:';
             conditionsDiv.appendChild(conditionsHeader);
+            
             if (connection.conditions && connection.conditions.length > 0) {
                 connection.conditions.forEach(condition => {
-                    const conditionElement = createConditionElement(condition); // Corrected line
+                    const conditionElement = createConditionElement(condition);
                     conditionsDiv.appendChild(conditionElement);
                 });
             }
+            
             const addConditionButton = document.createElement('button');
             addConditionButton.textContent = 'Add Condition';
             addConditionButton.onclick = function () {
@@ -433,17 +417,29 @@
                 const conditions = [];
 
                 conditionDivs.forEach(condDiv => {
-                    const typeSelect = condDiv.querySelector('select');
-                    const valueInput = condDiv.querySelector('input[type="text"]');
-                    if (typeSelect && valueInput) {
+                    const typeSelect = condDiv.querySelector('#conditionType');
+                    const keySelect = condDiv.querySelector('#conditionKey');
+                    const valueInput = condDiv.querySelector('#conditionValue');
+                    
+                    if (typeSelect && keySelect && valueInput) {
                         const type = typeSelect.value;
-                        let value = valueInput.value.trim();
-                        try {
-                            value = JSON.parse(value);
-                        } catch (e) {
-                            // Keep as string if not valid JSON
+                        const key = keySelect.value;
+                        let value = valueInput.value;
+                        
+                        // Convert value to appropriate type
+                        if (valueInput.type === 'number') {
+                            value = Number(value);
+                        } else if (value === 'true') {
+                            value = true;
+                        } else if (value === 'false') {
+                            value = false;
                         }
-                        conditions.push({ [type]: value });
+                        
+                        conditions.push({
+                            type: type,
+                            key: key,
+                            value: value
+                        });
                     }
                 });
 
