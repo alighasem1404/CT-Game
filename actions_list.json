@@ -4,7 +4,7 @@
     "location": "blacksmith",
     "name": "Forge Iron Gauntlets",
     "conditions": [
-      { "has_item": "IronPlate", "count_min": 2 }
+      { "type": "item_count", "key": "IronPlate", "value": 2 }
     ],
     "results": [
       { "ep_cost": 30, "chance": 1.0 },
@@ -19,8 +19,8 @@
     "location":"mine",
     "name": "Hazardous Depth Mining",
     "conditions": [
-      { "stat_min": { "DEX": 14 } },
-      { "flag_true": "completedSafetyTraining" }
+      { "type": "stat_min", "key": "dexterity", "value": 14 },
+      { "type": "quest_completed", "key": "SafetyTraining", "value": true }
     ],
     "results": [
       { "ep_cost": 25, "chance": 1.0 },
@@ -35,9 +35,9 @@
   {
     "subcategory": "Persuasion",
     "location": "main_square",
-    "name": "Gossip with Merchants,",
+    "name": "Gossip with Merchants",
     "conditions": [
-      { "has_item": "Ale" }
+      { "type": "has_item", "key": "Ale", "value": true }
     ],
     "results": [
       { "ep_cost": 20, "chance": 1.0 },

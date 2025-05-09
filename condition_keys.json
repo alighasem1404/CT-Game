@@ -33,9 +33,11 @@
         "Helmet",
         "Pickaxe",
         "Healing Herb",
-        "Magic Staff"
+        "Magic Staff",
+        "IronPlate"
     ],
     "quests":[
+        "SafetyTraining"
 
     ],
     "events":[

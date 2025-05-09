@@ -3,11 +3,11 @@
 <head>
 <title>Map Editor</title>
 <style>
-  .panel, .action-list-container { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; background-color: #444; }
-  .panel h2, .action-list-container h2 { margin-top: 0; color: #eee; }
+  .panel, .action-list-container, .json-output-container { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; background-color: #444; }
+  .panel h2, .action-list-container h2, .json-output-container h2 { margin-top: 0; color: #eee; }
   .field-group { margin-bottom: 10px; }
   .field-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #ddd; }
-  select, input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #555; background-color: #555; color: #eee; }
+  select, input, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #555; background-color: #555; color: #eee; }
   .conditions, .results { margin-top: 5px; }
   .item-row { display: flex; align-items: center; margin-bottom: 5px; }
   .item-row select, .item-row input { margin-right: 5px; background-color: #666; color: #eee; border: 1px solid #777; }
@@ -29,10 +29,17 @@
   .results .item-row input:nth-child(4) {
     width: 80px; /* Adjust width as needed */
   }
+
+  /* Style for the JSON output textarea */
+  #jsonDataOutput {
+      min-height: 200px; /* Give it some initial height */
+      resize: vertical; /* Allow vertical resizing */
+      font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; /* Monospace font for code */
+  }
 </style>
 </head>
 <body>
-    <h1>Loactions Creator & Editor</h1>
+    <h1>Locations Creator & Editor</h1>
 
 <div class="panel">
   <h2>Add/Edit Location</h2>
@@ -56,8 +63,15 @@
   <h2>Locations</h2>
   <ul id="locationList">
     </ul>
-  <button onclick="saveMapData()">Save to map.json</button>
+  <button onclick="saveMapData()">Save to map.json (Download)</button>
 </div>
+
+<div class="json-output-container">
+    <h2>Map Data JSON</h2>
+    <textarea id="jsonDataOutput" readonly></textarea>
+    <button onclick="copyJsonToClipboard()">Copy JSON</button>
+</div>
+
 
 <div id="error-message" style="display:none;"></div>
 
@@ -65,18 +79,44 @@
   let mapData = null; // Store the map data globally
 
   function loadMapData() {
+    // Attempt to load map.json. If it fails, initialize with a default structure.
     fetch('map.json')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          // If fetch fails (e.g., file not found), initialize default data
+          console.warn('map.json not found or failed to load. Initializing with default structure.');
+          mapData = {
+            map: {
+              areas: {
+                "default_area": {
+                  locations: []
+                }
+              }
+            }
+          };
+          populateAreaDropdown();
+          displayLocations();
+          updateJsonOutput(); // Update JSON output after initializing
+          return; // Stop further processing
+        }
+        return response.json();
+      })
       .then(data => {
-        mapData = data; // Store the data
-        populateAreaDropdown(); // Populate dropdown
-        displayLocations(); // Call displayLocations after data is loaded
+        // Only process data if it was successfully fetched
+        if (data) {
+          mapData = data; // Store the data
+          populateAreaDropdown(); // Populate dropdown
+          displayLocations(); // Call displayLocations after data is loaded
+          updateJsonOutput(); // Update JSON output after loading
+        }
       })
       .catch(error => {
-        document.getElementById('error-message').textContent = 'Error loading map data: ' + error;
+        document.getElementById('error-message').textContent = 'Error loading or initializing map data: ' + error;
         document.getElementById('error-message').style.display = 'block';
+        console.error('Error loading or initializing map data:', error);
       });
   }
+
 
   function populateAreaDropdown() {
     const areaSelect = document.getElementById('areaSelect');
@@ -84,12 +124,19 @@
 
     if (!mapData || !mapData.map || !mapData.map.areas) {
       console.error("Invalid map data structure.");
-      document.getElementById('error-message').textContent = 'Invalid map data structure.  Check map.json is structured correctly.';
+      document.getElementById('error-message').textContent = 'Invalid map data structure. Check map.json is structured correctly or refresh to initialize.';
       document.getElementById('error-message').style.display = 'block';
       return;
     }
 
     const areas = mapData.map.areas;
+    // Add a default blank option or prompt
+     const defaultOption = document.createElement('option');
+     defaultOption.value = "";
+     defaultOption.textContent = "--Select an Area--";
+     areaSelect.appendChild(defaultOption);
+
+
     for (const areaName in areas) {
       const option = document.createElement('option');
       option.value = areaName;
@@ -104,7 +151,7 @@
 
     if (!mapData || !mapData.map || !mapData.map.areas) {
       console.error("Invalid map data structure.");
-      document.getElementById('error-message').textContent = 'Invalid map data structure.  Check map.json is structured correctly.';
+      document.getElementById('error-message').textContent = 'Invalid map data structure. Check map.json is structured correctly or refresh to initialize.';
       document.getElementById('error-message').style.display = 'block';
       return;
     }
@@ -155,21 +202,36 @@
     document.getElementById('locationDescription').value = location.description;
     // Store the original ID for saving.
     document.getElementById('locationId').dataset.originalId = location.id;
+     document.getElementById('error-message').style.display = 'none'; // Hide error on successful form population
   }
 
   function saveLocation() {
-    const areaName = document.getElementById('areaSelect').value;
-    const id = document.getElementById('locationId').value;
-    const description = document.getElementById('locationDescription').value;
-    const originalId = document.getElementById('locationId').dataset.originalId;
+    const areaSelect = document.getElementById('areaSelect');
+    const areaName = areaSelect.value;
+    const idInput = document.getElementById('locationId');
+    const id = idInput.value.trim(); // Trim whitespace
+    const descriptionInput = document.getElementById('locationDescription');
+    const description = descriptionInput.value.trim(); // Trim whitespace
+    const originalId = idInput.dataset.originalId;
 
-
+    // Basic validation
     if (!areaName) {
-      console.error("Area name is undefined.  Cannot save location.");
-      document.getElementById('error-message').textContent = 'Area name is undefined.  Cannot save location.';
+      document.getElementById('error-message').textContent = 'Please select an Area.';
       document.getElementById('error-message').style.display = 'block';
       return;
     }
+    if (!id) {
+        document.getElementById('error-message').textContent = 'Please enter a Location ID.';
+        document.getElementById('error-message').style.display = 'block';
+        return;
+    }
+     if (!description) {
+        document.getElementById('error-message').textContent = 'Please enter a Location Description.';
+        document.getElementById('error-message').style.display = 'block';
+        return;
+    }
+
+
     let area = mapData.map.areas[areaName];
      if (!area || !area.locations) {
         console.error("Area or locations not found for area:", areaName);
@@ -178,6 +240,23 @@
         return;
     }
 
+    if (originalId && originalId !== id) {
+        // Check if the new ID already exists when editing
+        if (area.locations.some(loc => loc.id === id && loc.id !== originalId)) {
+            document.getElementById('error-message').textContent = `Location ID "${id}" already exists in "${areaName}".`;
+            document.getElementById('error-message').style.display = 'block';
+            return;
+        }
+    } else if (!originalId) {
+         // Check if the new ID already exists when adding
+        if (area.locations.some(loc => loc.id === id)) {
+             document.getElementById('error-message').textContent = `Location ID "${id}" already exists in "${areaName}".`;
+             document.getElementById('error-message').style.display = 'block';
+             return;
+        }
+    }
+
+
     if (originalId) {
       // Editing existing location
       const index = area.locations.findIndex(loc => loc.id === originalId);
@@ -185,7 +264,7 @@
         area.locations[index].id = id;
         area.locations[index].description = description;
       } else {
-        console.warn("Original location not found.  Adding as new.");
+        console.warn("Original location not found during edit. Adding as new.");
         area.locations.push({ id, description }); // Add as new if original not found
       }
     } else {
@@ -196,11 +275,14 @@
     mapData.map.areas[areaName] = area;
     console.log('Saving location:', { areaName, id, description, originalId });
     displayLocations(); // Refresh the list after saving
+    updateJsonOutput(); // Update JSON output after saving
+
     // Clear the form
-    document.getElementById('areaSelect').value = '';
-    document.getElementById('locationId').value = '';
-    document.getElementById('locationDescription').value = '';
-    delete document.getElementById('locationId').dataset.originalId;
+    areaSelect.value = ""; // Reset dropdown
+    idInput.value = '';
+    descriptionInput.value = '';
+    delete idInput.dataset.originalId;
+    document.getElementById('error-message').style.display = 'none'; // Hide error on successful save
   }
 
   function deleteLocation(areaName, locationId) {
@@ -222,6 +304,8 @@
       mapData.map.areas[areaName] = area; // Update mapData
       console.log(`Deleted location ${locationId} from area ${areaName}`);
       displayLocations(); // Refresh the list
+      updateJsonOutput(); // Update JSON output after deleting
+       document.getElementById('error-message').style.display = 'none'; // Hide error on successful delete
     } else {
       console.warn(`Location ${locationId} not found in area ${areaName}`);
       document.getElementById('error-message').textContent = `Location not found.`;
@@ -248,13 +332,53 @@
       URL.revokeObjectURL(url); // Clean up the URL object
 
       console.log('Map data saved successfully to map.json');
-      alert('Map data saved successfully to map.json!  Check your downloads folder.');
+      alert('Map data saved successfully to map.json! Check your downloads folder.');
+       document.getElementById('error-message').style.display = 'none'; // Hide error on successful download
     } catch (error) {
       console.error('Error saving map data:', error);
       document.getElementById('error-message').textContent = 'Error saving map data: ' + error;
       document.getElementById('error-message').style.display = 'block';
     }
   }
+
+  // Function to update the JSON output textarea
+  function updateJsonOutput() {
+      const jsonDataOutput = document.getElementById('jsonDataOutput');
+      if (mapData) {
+          jsonDataOutput.value = JSON.stringify(mapData, null, 2);
+      } else {
+          jsonDataOutput.value = 'Map data not loaded yet.';
+      }
+  }
+
+  // Function to copy the JSON text to the clipboard
+  function copyJsonToClipboard() {
+      const jsonDataOutput = document.getElementById('jsonDataOutput');
+      jsonDataOutput.select(); // Select the text in the textarea
+      jsonDataOutput.setSelectionRange(0, 99999); // For mobile devices
+
+      try {
+          navigator.clipboard.writeText(jsonDataOutput.value).then(() => {
+              alert('JSON data copied to clipboard!');
+          }).catch(err => {
+              console.error('Failed to copy JSON: ', err);
+               document.getElementById('error-message').textContent = 'Failed to copy JSON to clipboard.';
+               document.getElementById('error-message').style.display = 'block';
+          });
+      } catch (err) {
+          // Fallback for older browsers or non-secure contexts
+          console.error('Clipboard API not available, using execCommand fallback:', err);
+          try {
+              document.execCommand('copy');
+               alert('JSON data copied to clipboard (using fallback)!');
+          } catch (fallbackErr) {
+              console.error('Fallback copy failed:', fallbackErr);
+               document.getElementById('error-message').textContent = 'Copying to clipboard is not supported in this browser.';
+               document.getElementById('error-message').style.display = 'block';
+          }
+      }
+  }
+
 
   // Load the map data when the page loads
   window.onload = loadMapData;

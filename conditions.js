@@ -46,11 +46,13 @@ async function loadConditionKeys() {
 
 function createConditionInput(availableConditionTypes, loadedData = null) {
     const container = document.createElement('div');
+    const uniqueId = Date.now() + Math.random().toString(36).substr(2, 9);
 
     const typeLabel = document.createElement('label');
     typeLabel.textContent = 'Condition Type:';
     const typeSelect = document.createElement('select');
-    typeSelect.id = 'conditionType';
+    typeSelect.id = `conditionType-${uniqueId}`;
+    typeSelect.className = 'condition-type';
 
     const defaultTypeOption = document.createElement('option');
     defaultTypeOption.value = '';
@@ -69,7 +71,8 @@ function createConditionInput(availableConditionTypes, loadedData = null) {
     const keyLabel = document.createElement('label');
     keyLabel.textContent = 'Condition Key:';
     const keySelect = document.createElement('select');
-    keySelect.id = 'conditionKey';
+    keySelect.id = `conditionKey-${uniqueId}`;
+    keySelect.className = 'condition-key';
 
     const defaultKeyOption = document.createElement('option');
     defaultKeyOption.value = '';
@@ -81,12 +84,12 @@ function createConditionInput(availableConditionTypes, loadedData = null) {
 
     const valueLabel = document.createElement('label');
     valueLabel.textContent = 'Value:';
-    let valueInput = document.createElement('input'); // Declare valueInput with let
+    let valueInput = document.createElement('input');
     valueInput.type = 'text';
-    valueInput.id = 'conditionValue';
+    valueInput.id = `conditionValue-${uniqueId}`;
+    valueInput.className = 'condition-value';
     container.appendChild(valueLabel);
     container.appendChild(valueInput);
-
 
     typeSelect.addEventListener('change', () => {
         const selectedType = typeSelect.value;
@@ -94,7 +97,6 @@ function createConditionInput(availableConditionTypes, loadedData = null) {
         valueInput.value = '';
 
         if (selectedType && conditionTypes[selectedType]) {
-            // Populate the keySelect dropdown based on conditionKeys
             const keysForType = conditionKeys[conditionTypes[selectedType].key];
             if (keysForType) {
                 for (const key of keysForType) {
@@ -117,7 +119,8 @@ function createConditionInput(availableConditionTypes, loadedData = null) {
                 valueInput.type = 'number';
             } else if (formatString.includes('true/false')) {
                 const valueSelect = document.createElement('select');
-                valueSelect.id = 'conditionValue';
+                valueSelect.id = `conditionValue-${uniqueId}`;
+                valueSelect.className = 'condition-value';
                 const trueOption = document.createElement('option');
                 trueOption.value = 'true';
                 trueOption.textContent = 'True';
@@ -127,7 +130,7 @@ function createConditionInput(availableConditionTypes, loadedData = null) {
                 valueSelect.appendChild(trueOption);
                 valueSelect.appendChild(falseOption);
                 valueInput.parentNode.replaceChild(valueSelect, valueInput);
-                valueInput = valueSelect; // Reassign valueInput
+                valueInput = valueSelect;
             } else {
                 valueInput.type = 'text';
             }
@@ -147,23 +150,19 @@ function createConditionInput(availableConditionTypes, loadedData = null) {
                 const keyEvent = new Event('change');
                 keySelect.dispatchEvent(keyEvent);
 
-                // Wait for the next tick to ensure the input type is set
                 setTimeout(() => {
-                    const valueInput = document.getElementById('conditionValue');
+                    const valueInput = document.getElementById(`conditionValue-${uniqueId}`);
                     if (valueInput) {
                         const formatString = conditionTypes[loadedData.type].format;
                         if (formatString.includes('true/false')) {
-                            // For true/false values, ensure we're working with a select element
                             if (valueInput.tagName === 'SELECT') {
                                 valueInput.value = loadedData.value.toString();
                             }
                         } else if (formatString.includes('value') || formatString.includes('count')) {
-                            // For numeric values, ensure we're working with a number input
                             if (valueInput.type === 'number') {
                                 valueInput.value = loadedData.value;
                             }
                         } else {
-                            // For other values, use as is
                             valueInput.value = loadedData.value;
                         }
                     }

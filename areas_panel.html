@@ -3,14 +3,14 @@
 <head>
     <title>Map Editor</title>
     <style>
-        .panel, .action-list-container {
+        .panel, .action-list-container, .json-output-container { /* Added .json-output-container */
             border: 1px solid #ccc;
             padding: 15px;
             margin-bottom: 20px;
             background-color: #444;
         }
 
-        .panel h2, .action-list-container h2 {
+        .panel h2, .action-list-container h2, .json-output-container h2 { /* Added .json-output-container h2 */
             margin-top: 0;
             color: #ddd;
         }
@@ -26,7 +26,7 @@
             color: #ddd;
         }
 
-        select, input {
+        select, input, textarea { /* Added textarea */
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
@@ -78,12 +78,12 @@
             background-color: #4cae4c;
         }
 
-        #actionList {
+        #areaList { /* Changed from actionList to areaList */
             list-style: none;
             padding: 0;
         }
 
-        #actionList li {
+        #areaList li { /* Changed from actionList li to areaList li */
             padding: 10px;
             border-bottom: 1px solid #eee;
             display: flex;
@@ -92,38 +92,38 @@
             color: #eee;
         }
 
-        #actionList li:last-child {
+        #areaList li:last-child { /* Changed from actionList li:last-child */
             border-bottom: none;
         }
 
-        #actionList li span {
+        #areaList li span { /* Changed from actionList li span */
             flex-grow: 1;
             margin-right: 10px;
         }
 
-        #actionList li button {
+        #areaList li button { /* Changed from actionList li button */
             padding: 5px 10px;
             margin-left: 10px;
             cursor: pointer;
         }
 
-        #actionList li .edit-btn {
+        #areaList li .edit-btn { /* Changed from actionList li .edit-btn */
             background-color: #007bff;
             color: white;
             border: none;
         }
 
-        #actionList li .edit-btn:hover {
+        #areaList li .edit-btn:hover { /* Changed from actionList li .edit-btn:hover */
             background-color: #0056b3;
         }
 
-        #actionList li .delete-btn {
+        #areaList li .delete-btn { /* Changed from actionList li .delete-btn */
             background-color: #d9534f;
             color: white;
             border: none;
         }
 
-        #actionList li .delete-btn:hover {
+        #areaList li .delete-btn:hover { /* Changed from actionList li .delete-btn:hover */
             background-color: #c9302c;
         }
 
@@ -205,6 +205,13 @@
         #locationPanel button:hover {
             background-color: #0056b3;
         }
+
+        /* Style for the JSON output textarea */
+        #jsonDataOutput {
+            min-height: 200px; /* Give it some initial height */
+            resize: vertical; /* Allow vertical resizing */
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; /* Monospace font for code */
+        }
     </style>
 </head>
 <body>
@@ -256,6 +263,13 @@
         <button type="button" onclick="saveLocationToArea()">Save Location</button>
         <button type="button" onclick="closeAddLocationPanel()">Cancel</button>
     </div>
+
+    <div class="json-output-container">
+        <h2>Map Data JSON</h2>
+        <textarea id="jsonDataOutput" readonly></textarea>
+        <button onclick="copyJsonToClipboard()">Copy JSON</button>
+    </div>
+
     <button id="saveButton" onclick="saveToFile()">Save to File</button>
     <a href="panels.html" class="w-full">
         <button class="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-teal-500 text-white font-semibold text-lg
@@ -275,7 +289,19 @@
         // Initialize conditions when the page loads
         window.addEventListener('load', function() {
             loadConditionKeys();
+            loadJSON(function (data) {
+                if (data) {
+                    jsonData = data; // Assign the loaded data
+                    displayAreas();
+                    prepareAddArea();
+                    updateJsonOutput(); // Update JSON output after loading
+                } else {
+                    // Handle error case - the error message should already be displayed by loadJSON
+                    updateJsonOutput(); // Still update output even if data is null
+                }
+            });
         });
+
 
         function displayAreas() {
             const areaList = document.getElementById('areaList');
@@ -329,7 +355,7 @@
         function createConditionElement(condition) {
             const conditionDiv = document.createElement('div');
             conditionDiv.classList.add('item-row');
-            
+
             // Use the createConditionInput function from conditions.js
             const conditionInput = createConditionInput(conditionTypes, condition);
             conditionDiv.appendChild(conditionInput);
@@ -347,18 +373,27 @@
         function createConnectionElement(connection, index) {
             const connectionDiv = document.createElement('div');
             connectionDiv.classList.add('item-row');
+            connectionDiv.dataset.connectionIndex = index || Date.now();
 
             const toLabel = document.createElement('label');
             toLabel.textContent = 'To:';
             const toSelect = document.createElement('select');
-            toSelect.id = `connectionTo-${index}`;
+            toSelect.id = `connectionTo-${connectionDiv.dataset.connectionIndex}`;
+            toSelect.required = true;
+
+            // Add a default empty option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '-- Select Area --';
+            defaultOption.selected = true;
+            toSelect.appendChild(defaultOption);
 
             // Populate the dropdown with area IDs
             for (const areaId in jsonData.map.areas) {
                 const option = document.createElement('option');
                 option.value = areaId;
                 option.textContent = areaId;
-                if (connection.to === areaId) {
+                if (connection && connection.to === areaId) {
                     option.selected = true;
                 }
                 toSelect.appendChild(option);
@@ -369,14 +404,14 @@
             const conditionsHeader = document.createElement('h3');
             conditionsHeader.textContent = 'Conditions:';
             conditionsDiv.appendChild(conditionsHeader);
-            
-            if (connection.conditions && connection.conditions.length > 0) {
+
+            if (connection && connection.conditions && connection.conditions.length > 0) {
                 connection.conditions.forEach(condition => {
                     const conditionElement = createConditionElement(condition);
                     conditionsDiv.appendChild(conditionElement);
                 });
             }
-            
+
             const addConditionButton = document.createElement('button');
             addConditionButton.textContent = 'Add Condition';
             addConditionButton.onclick = function () {
@@ -400,7 +435,8 @@
 
         function addConnection() {
             const connectionsDiv = document.getElementById('connections');
-            connectionsDiv.appendChild(createConnectionElement({}));
+            const connectionDiv = createConnectionElement({});
+            connectionsDiv.appendChild(connectionDiv);
         }
 
         function deleteArea(areaId) {
@@ -408,6 +444,7 @@
                 delete jsonData.map.areas[areaId];
                 displayAreas();
                 prepareAddArea();
+                updateJsonOutput(); // Update JSON output after deleting
             }
         }
 
@@ -418,21 +455,53 @@
             const connectionElements = connectionsDiv.querySelectorAll('.item-row');
             const connections = [];
 
+            // Validate area ID
+            if (!areaId) {
+                displayError("Area ID cannot be empty.");
+                return;
+            }
+
+            // Validate description
+            if (!description) {
+                displayError("Area description cannot be empty.");
+                return;
+            }
+
+            // Process connections
             connectionElements.forEach(connElement => {
-                const toSelect = connElement.querySelector('select');
-                const conditionDivs = connElement.querySelectorAll('.conditions > .item-row');
+                // Skip if this is not a connection element (e.g., it might be a condition element)
+                if (!connElement.querySelector('select[id^="connectionTo-"]')) {
+                    return;
+                }
+
+                const toSelect = connElement.querySelector('select[id^="connectionTo-"]');
+                const selectedValue = toSelect.value.trim();
+
+                // Skip if no destination selected
+                if (!selectedValue) {
+                    return;
+                }
+
+                const conditionsDiv = connElement.querySelector('.conditions');
+                const conditionElements = conditionsDiv ? conditionsDiv.querySelectorAll('.item-row') : [];
                 const conditions = [];
 
-                conditionDivs.forEach(condDiv => {
-                    const typeSelect = condDiv.querySelector('#conditionType');
-                    const keySelect = condDiv.querySelector('#conditionKey');
-                    const valueInput = condDiv.querySelector('#conditionValue');
-                    
+                // Process conditions
+                conditionElements.forEach(condElement => {
+                    const typeSelect = condElement.querySelector('.condition-type');
+                    const keySelect = condElement.querySelector('.condition-key');
+                    const valueInput = condElement.querySelector('.condition-value');
+
                     if (typeSelect && keySelect && valueInput) {
                         const type = typeSelect.value;
                         const key = keySelect.value;
                         let value = valueInput.value;
-                        
+
+                        // Skip empty conditions
+                        if (!type || !key) {
+                            return;
+                        }
+
                         // Convert value to appropriate type
                         if (valueInput.type === 'number') {
                             value = Number(value);
@@ -441,7 +510,7 @@
                         } else if (value === 'false') {
                             value = false;
                         }
-                        
+
                         conditions.push({
                             type: type,
                             key: key,
@@ -450,29 +519,41 @@
                     }
                 });
 
-                if (toSelect && toSelect.value.trim()) {
-                    connections.push({ to: toSelect.value.trim(), conditions: conditions });
-                }
+                // Add connection with its conditions
+                connections.push({ to: selectedValue, conditions: conditions });
             });
 
-            if (currentAreaId) {
-                jsonData.map.areas[currentAreaId].description = description;
-                jsonData.map.areas[currentAreaId].connections = connections;
-                jsonData.map.areas[currentAreaId].locations = currentAreaLocations;
-            } else if (areaId) {
-                if (jsonData.map.areas[areaId]) {
-                    displayError(`Area with ID "${areaId}" already exists.`);
-                    return;
-                }
-                jsonData.map.areas[areaId] = { description: description, connections: connections, locations: currentAreaLocations };
-            } else {
-                displayError("Area ID cannot be empty when adding a new area.");
-                return;
-            }
+            try {
+                const areaData = {
+                    description: description,
+                    connections: connections,
+                    locations: currentAreaLocations
+                };
 
-            hideError();
-            displayAreas();
-            prepareAddArea();
+                if (currentAreaId) {
+                    // Editing existing area
+                    if (currentAreaId !== areaId) {
+                        displayError("Cannot change area ID when editing an existing area.");
+                        return;
+                    }
+                    jsonData.map.areas[currentAreaId] = areaData;
+                } else {
+                    // Adding new area
+                    if (jsonData.map.areas[areaId]) {
+                        displayError(`Area with ID "${areaId}" already exists.`);
+                        return;
+                    }
+                    jsonData.map.areas[areaId] = areaData;
+                }
+
+                hideError();
+                displayAreas();
+                prepareAddArea();
+                updateJsonOutput();
+            } catch (error) {
+                displayError("Error saving area: " + error.message);
+                console.error("Error saving area:", error);
+            }
         }
 
         function cancelEditArea() {
@@ -540,6 +621,7 @@
             hideError();
             displayAreaLocations();
             closeAddLocationPanel();
+            updateJsonOutput(); // Update JSON output after saving location
         }
 
         function editAreaLocation(locationId) {
@@ -559,6 +641,7 @@
                 if (index > -1) {
                     currentAreaLocations.splice(index, 1);
                     displayAreaLocations();
+                    updateJsonOutput(); // Update JSON output after removing location
                 }
             }
         }
@@ -578,7 +661,9 @@
             fetch('map.json')
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        // If map.json doesn't exist or fails to load, initialize empty data
+                        console.warn('map.json not found or failed to load. Initializing empty data.');
+                        return { map: { areas: {} } };
                     }
                     return response.json();
                 })
@@ -586,21 +671,11 @@
                     callback(data);
                 })
                 .catch(error => {
-                    displayError("Error loading JSON: " + error.message);
-                    callback(null); // Pass null to callback to indicate error
+                    displayError("Error loading JSON: " + error.message + ". Initializing empty data.");
+                    console.error("Error loading JSON:", error);
+                    callback({ map: { areas: {} } }); // Initialize empty data on error
                 });
         }
-
-        // Initialize
-        loadJSON(function (data) {
-            if (data) {
-                jsonData = data; // Assign the loaded data
-                displayAreas();
-                prepareAddArea();
-            } else {
-                // Handle error case - the error message should already be displayed by loadJSON
-            }
-        });
 
         function saveToFile() {
             const dataStr = JSON.stringify(jsonData, null, 2); // Pretty print JSON
@@ -614,6 +689,43 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url); // Clean up the URL object
         }
+
+        // Function to update the JSON output textarea
+        function updateJsonOutput() {
+            const jsonDataOutput = document.getElementById('jsonDataOutput');
+            if (jsonData) {
+                jsonDataOutput.value = JSON.stringify(jsonData, null, 2);
+            } else {
+                jsonDataOutput.value = 'Map data is empty or not loaded.';
+            }
+        }
+
+        // Function to copy the JSON text to the clipboard
+        function copyJsonToClipboard() {
+            const jsonDataOutput = document.getElementById('jsonDataOutput');
+            jsonDataOutput.select(); // Select the text in the textarea
+            jsonDataOutput.setSelectionRange(0, 99999); // For mobile devices
+
+            try {
+                navigator.clipboard.writeText(jsonDataOutput.value).then(() => {
+                    alert('JSON data copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy JSON: ', err);
+                    displayError('Failed to copy JSON to clipboard.');
+                });
+            } catch (err) {
+                // Fallback for older browsers or non-secure contexts
+                console.error('Clipboard API not available, using execCommand fallback:', err);
+                try {
+                    document.execCommand('copy');
+                    alert('JSON data copied to clipboard (using fallback)!');
+                } catch (fallbackErr) {
+                    console.error('Fallback copy failed:', fallbackErr);
+                    displayError('Copying to clipboard is not supported in this browser.');
+                }
+            }
+        }
+
     </script>
 </body>
 </html>

@@ -100,6 +100,7 @@
     </button>
 </a>
 
+  <script src="conditions.js"></script>
   <script>
 
      let catOptions = [];
@@ -235,20 +236,17 @@
 
 
     function addCond() {
-      const row = document.createElement('div'); row.className = 'item-row';
-      const sel = document.createElement('select');
-	  sel.add(new Option('', 'Select a condition type'));  // Added placeholder
-	  condTypes.forEach(t => sel.add(new Option(t,t)));
-      let keyField = createKeyField('', '');
-      const valI = document.createElement('input'); valI.placeholder = 'value';
-      const del = document.createElement('button'); del.textContent = '×'; del.onclick = () => row.remove();
-      sel.onchange = () => {
-        const newKey = createKeyField(sel.value, '');
-        row.replaceChild(newKey, keyField);
-        keyField = newKey;
-      };
-      row.append(sel, keyField, valI, del);
-      condsContainer.append(row);
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      const conditionInput = createConditionInput(conditionTypes);
+      row.appendChild(conditionInput);
+      
+      const del = document.createElement('button');
+      del.textContent = '×';
+      del.onclick = () => row.remove();
+      row.appendChild(del);
+      
+      condsContainer.appendChild(row);
     }
 
     function addRes() {
@@ -307,32 +305,17 @@
 
   if (a.conditions && Array.isArray(a.conditions)) {
     a.conditions.forEach(cond => {
-      addCond();
-      const row = condsContainer.lastElementChild;
-      const sel = row.querySelector('select');
-      const inputKey = row.querySelector('input:nth-of-type(1)');
-      const inputValue = row.querySelector('input:nth-of-type(2)');
-
-      const condType = Object.keys(cond)[0];
-      sel.value = condType;
-
-      let keyName = '';
-      let keyValue = '';
-
-      if (condType === 'stat_min') {
-        keyName = Object.keys(cond.stat_min)[0];
-        keyValue = cond.stat_min[keyName];
-      } else if (condType === 'has_item') {
-        keyName = cond.has_item;
-        keyValue = cond.count_min;
-      } else if (condType === 'flag_true' || condType === 'flag_false') {
-        keyName = cond[condType];
-        keyValue = '';
-      }
-
-      const newKeyField = createKeyField(condType, keyName);
-      row.replaceChild(newKeyField, inputKey);
-      inputValue.value = keyValue;
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      const conditionInput = createConditionInput(conditionTypes, cond);
+      row.appendChild(conditionInput);
+      
+      const del = document.createElement('button');
+      del.textContent = '×';
+      del.onclick = () => row.remove();
+      row.appendChild(del);
+      
+      condsContainer.appendChild(row);
     });
   }
 
@@ -347,7 +330,7 @@
 
       const resType = Object.keys(res)[0];
       sel.value = resType;
-      inputChance.value = res.chance !== undefined ? res.chance : 1.0; // Default to 1.0 if not present
+      inputChance.value = res.chance !== undefined ? res.chance : 1.0;
 
       let keyName = '';
       let keyValue = '';
@@ -444,6 +427,11 @@
     filterLocationSelect.onchange = renderList;
     addCondBtn.onclick=addCond;
     addResBtn.onclick=addRes;
+
+    // Initialize conditions when the page loads
+    window.addEventListener('load', function() {
+        loadConditionKeys();
+    });
   </script>
 </body>
 </html>
