@@ -1,437 +1,590 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Action Import & Editor Panel</title>
-  <style>
-     .panel, .action-list-container { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
-    .panel h2, .action-list-container h2 { margin-top: 0; }
-    .field-group { margin-bottom: 10px; }
-    .field-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-    select, input { width: 100%; padding: 5px; box-sizing: border-box; }
-    .conditions, .results { margin-top: 5px; }
-    .item-row { display: flex; align-items: center; margin-bottom: 5px; }
-    .item-row select, .item-row input { margin-right: 5px; }
-    .item-row button { margin-left: auto; }
-    #actionList { list-style: none; padding: 0; }
-    #actionList li { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
-    button { padding: 5px 10px; }
-	
-	
-	
-	body { font-family: Arial, sans-serif; margin: 20px; background-color: #333; color: #eee; }
-    #error-message {
-        color: red;
-        font-weight: bold;
-        margin-top: 10px;
-        padding: 10px;
-        border: 1px solid red;
-        background-color: #ffe0e0;
-    }
-    .results .item-row label:nth-child(4),
-    .results .item-row input:nth-child(4) {
-        width: 80px; /* Adjust width as needed */
-    }
-    
-  </style>
+    <meta charset="UTF-8">
+    <title>Action Editor Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #333;
+            color: #eee;
+        }
+
+        .panel {
+            background-color: #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .field-group {
+            margin-bottom: 15px;
+        }
+
+        .field-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #666;
+            border-radius: 4px;
+            background-color: #555;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .item-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #555;
+            border-radius: 4px;
+        }
+
+        .item-row select, .item-row input {
+            margin-bottom: 0;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button.delete {
+            background-color: #f44336;
+        }
+
+        button.delete:hover {
+            background-color: #da190b;
+        }
+
+        #actionList {
+            list-style: none;
+            padding: 0;
+        }
+
+        #actionList li {
+            background-color: #444;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #error-message {
+            color: #ff6b6b;
+            background-color: #2d2d2d;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Action Creator & Editor</h1>
-  <div id="error-message" style="display:none;"></div>  <input type="file" id="fileInput" accept="application/json" style="display:none;"/>  <div class="panel" id="editPanel">
-    <h2 id="panelTitle">New Action</h2>
-    <div class="field-group">
-      <label>Location</label>
-      <select id="locationSelect"></select>
+    <h1>Action Editor</h1>
+    <div id="error-message"></div>
+
+    <div class="header-buttons">
+      <a href="panels.html" class="w-full">
+        <button class="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-teal-500 text-white font-semibold text-lg
+                   shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300
+                   focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
+                   flex items-center justify-center">
+                Panel Central
+        </button>
+    </a>
+        <button id="newActionBtn">New Action</button>
+        <button id="saveFileBtn">Save to File</button>
+        <input type="file" id="fileInput" accept="application/json" style="display: none;">
+        <button id="loadFileBtn">Load File</button>
     </div>
-    <div class="field-group">
-      <label>Subcategory</label>
-      <select id="subSelect"></select>
-    </div>
-    <div class="field-group">
-      <label>Name</label>
-      <input type="text" id="nameInput" />
-    </div>
-    <div class="field-group">
-      <label>Conditions</label>
-      <div class="conditions" id="condsContainer">
-        <div class="item-row">
-          <label>Type</label>
-          <label>Key</label>
-          <label>Value</label>
+
+    <div class="panel" id="editPanel">
+        <h2 id="panelTitle">New Action</h2>
+        
+        <div class="field-group">
+            <label>Location</label>
+            <select id="locationSelect"></select>
         </div>
-      </div>
-      <button id="addCondBtn">+ Condition</button>
-    </div>
-    <div class="field-group">
-      <label>Results</label>
-      <div class="results" id="resContainer">
-        <div class="item-row">
-          <label>Type</label>
-          <label>Key</label>
-          <label>Value</label>
-          <label>Chance</label>
+
+        <div class="field-group">
+            <label>Subcategory</label>
+            <select id="subSelect"></select>
         </div>
-      </div>
-      <button id="addResBtn">+ Result</button>
+
+        <div class="field-group">
+            <label>Name</label>
+            <input type="text" id="nameInput" placeholder="Enter action name">
+        </div>
+
+        <div class="field-group">
+            <label>Conditions</label>
+            <div id="condsContainer"></div>
+            <button id="addCondBtn">+ Add Condition</button>
+        </div>
+
+        <div class="field-group">
+            <label>Results</label>
+            <div id="resContainer"></div>
+            <button id="addResBtn">+ Add Result</button>
+        </div>
+
+        <div class="field-group">
+            <button id="saveBtn">Save Action</button>
+        </div>
     </div>
-    <button id="saveBtn">Save Action</button>
-    <button id="newBtn">New Action</button>
-  </div>
 
-  <div class="action-list-container">
-    <h2>Loaded Actions</h2>
-    <div class="field-group">
-        <label>Filter by Location</label>
-        <select id="filterLocationSelect">
-            <option value="">All Locations</option>
-        </select>
+    <div class="panel">
+        <h2>Actions List</h2>
+        <div class="field-group">
+            <label>Filter by Location</label>
+            <select id="filterLocationSelect">
+                <option value="">All Locations</option>
+            </select>
+        </div>
+        <ul id="actionList"></ul>
     </div>
-    <ul id="actionList"></ul>
-  </div>
 
-  <button id="saveFileBtn">Save to File</button>
+    <script src="conditions.js"></script>
+    <script>
+        // Global variables
+        let actions = [];
+        let editIndex = -1;
+        let locationOptions = [];
+        let catOptions = [];
 
-  <a href="panels.html" class="w-full">
-    <button class="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-teal-500 text-white font-semibold text-lg
-               shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300
-               focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
-               flex items-center justify-center">
-            Panel Central
-    </button>
-</a>
+        // DOM Elements
+        const locationSelect = document.getElementById('locationSelect');
+        const subSelect = document.getElementById('subSelect');
+        const nameInput = document.getElementById('nameInput');
+        const condsContainer = document.getElementById('condsContainer');
+        const resContainer = document.getElementById('resContainer');
+        const actionList = document.getElementById('actionList');
+        const filterLocationSelect = document.getElementById('filterLocationSelect');
+        const errorMessage = document.getElementById('error-message');
 
-  <script src="conditions.js"></script>
-  <script>
-
-     let catOptions = [];
-    let locationOptions = [];
-    let actions = [];
-    let editIndex = -1;
-    let loadedFilename = 'actions.json';
-
-    // Get DOM elements
-    const subSelect = document.getElementById('subSelect');
-	const locationSelect = document.getElementById('locationSelect');
-    const condsContainer = document.getElementById('condsContainer');
-    const resContainer = document.getElementById('resContainer');
-    const actionList = document.getElementById('actionList');
-    const nameInput = document.getElementById('nameInput');
-    const saveBtn = document.getElementById('saveBtn');
-    const newBtn = document.getElementById('newBtn');
-    const fileInput = document.getElementById('fileInput');
-    const saveFileBtn = document.getElementById('saveFileBtn');
-    const addCondBtn = document.getElementById('addCondBtn');
-    const addResBtn = document.getElementById('addResBtn');
-    const panelTitle = document.getElementById('panelTitle');
-    const errorMessageElement = document.getElementById('error-message');
-    const filterLocationSelect = document.getElementById('filterLocationSelect'); // Get the filter dropdown
-
-
-    // Load categories from action_categories.json, fallback to default list
-    fetch('action_categories.json')
-        .then(res => res.ok ? res.json() : Promise.reject('not found'))
-        .then(data => {
-            if (Array.isArray(data)) {
-                catOptions = data;
-            } else {
-                // Flatten all subcategories from all categories
-                catOptions = Object.values(data).flat();
-            }
-            initSubcategories();
-        })
-        .catch(err => {
-            console.warn('action_categories.json not found or invalid, using default categories.');
-            catOptions = ['weapons','armor','mining','social','merchant','explore'];
-            initSubcategories();
-        });
-
-    // Load locations from map.json
-    fetch('map.json')
-        .then(res => res.ok ? res.json() : Promise.reject())
-        .then(data => {
-            // Extract all location IDs from all areas
-            locationOptions = [];
-            if (data.map && data.map.areas) {
-                Object.values(data.map.areas).forEach(area => {
-                    if (area.locations && Array.isArray(area.locations)) {
-                        locationOptions.push(...area.locations.map(loc => loc.id));
+        // Initialize the application
+        async function initialize() {
+            try {
+                // Load locations
+                const locationsResponse = await fetch('map.json');
+                if (locationsResponse.ok) {
+                    const data = await locationsResponse.json();
+                    if (data.map && data.map.areas) {
+                        locationOptions = Object.values(data.map.areas)
+                            .flatMap(area => area.locations || [])
+                            .map(loc => loc.id);
                     }
-                });
-            }
-            initLocation();
-        })
-        .catch(() => {
-            locationOptions = ['inventory', 'battle', 'world']; // Default locations
-            initLocation();
-        });
-
-    // Attempt to load items.json if present
-    let itemsList = [];
-    fetch('items_list.json')
-        .then(res => res.ok ? res.json() : Promise.reject())
-        .then(data => { itemsList = data.items || data; })
-        .catch(() => {});
-
-    const condTypes = ['stat_min','has_item','flag_true','flag_false'];
-    const resultTypes = ['ep_cost','stat_increase','add_item','set_flag','message'];
-
-
-
-    function initSubcategories() {
-      subSelect.innerHTML = '';
-      catOptions.forEach(c => subSelect.add(new Option(c, c)));
-    }
-	
-	function initLocation() {
-      locationSelect.innerHTML = '';
-      locationOptions.forEach(loc => locationSelect.add(new Option(loc, loc)));
-      // Populate the filter dropdown
-      filterLocationSelect.innerHTML = '<option value="">All Locations</option>'; // Clear first
-      locationOptions.forEach(loc => filterLocationSelect.add(new Option(loc, loc)));
-    }
-
-    function createKeyField(type, initialValue = '') {
-        if ((type === 'has_item' || type === 'add_item') && itemsList.length) {
-            const select = document.createElement('select');
-            itemsList.forEach(item => select.add(new Option(item, item)));
-            select.value = initialValue;
-            return select;
-        } else if (type === 'stat_min' || type === 'stat_increase') {
-            const select = document.createElement('select');
-            fetch('character_stat.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch character stats');
-                    }
-                    return response.json();
-                })
-                .then(statsData => {
-                    statsData.forEach(stat => {
-                        select.add(new Option(stat, stat));
-                    });
-                    select.value = initialValue;
-                })
-                .catch(error => {
-                    console.error("Error fetching or processing character_stat.json:", error);
-                    const defaultStats = [
-                        "max_energy", "energy",    "max_health",
-                        "health",     "copper",    "silver",
-                        "gold",       "strength",  "dexterity",
-                        "constitution", "intelligence", "charisma",
-                        "wisdom",     "food",      "drink",
-                        "reputation"
-                    ];
-                    defaultStats.forEach(stat =>  select.add(new Option(stat, stat)));
-                    select.value = initialValue;
-                });
-            return select;
-        }
-        else {
-            const input = document.createElement('input');
-            input.placeholder = 'key';
-            input.value = initialValue;
-            return input;
-        }
-    }
-
-
-    function addCond() {
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      const conditionInput = createConditionInput(conditionTypes);
-      row.appendChild(conditionInput);
-      
-      const del = document.createElement('button');
-      del.textContent = '×';
-      del.onclick = () => row.remove();
-      row.appendChild(del);
-      
-      condsContainer.appendChild(row);
-    }
-
-    function addRes() {
-      const row = document.createElement('div'); row.className = 'item-row';
-      const sel = document.createElement('select');
-	  sel.add(new Option('', 'Select a result type'));  // Added placeholder
-	  resultTypes.forEach(t => sel.add(new Option(t,t)));
-      let keyField = createKeyField('', '');
-      const valI = document.createElement('input'); valI.placeholder = 'value';
-      const chanceI = document.createElement('input'); chanceI.placeholder = 'chance'; chanceI.type = 'number'; chanceI.min = '0'; chanceI.max = '1'; chanceI.step = '0.01';
-      const del = document.createElement('button'); del.textContent = '×'; del.onclick = () => row.remove();
-      sel.onchange = () => {
-        const newKey = createKeyField(sel.value, '');
-        row.insertBefore(newKey, valI.nextSibling); // Insert key field before value
-        if (keyField) {
-            row.removeChild(keyField);
-        }
-        keyField = newKey;
-      };
-      row.append(sel, keyField, valI, chanceI, del);
-      resContainer.append(row);
-    }
-
-    function renderList() {
-        const selectedLocation = filterLocationSelect.value;
-        actionList.innerHTML = ''; // Clear the list
-        actions.forEach((act, i) => {
-            if (!selectedLocation || act.location === selectedLocation) { // Only show if no filter or matches filter
-                const li = document.createElement('li');
-                li.textContent = `[${act.subcategory} - ${act.location}] ${act.name}`;
-                const edit = document.createElement('button'); edit.textContent = 'Edit'; edit.onclick = () => loadAction(i);
-                const del = document.createElement('button'); del.textContent = 'Delete'; del.onclick = () => { actions.splice(i,1); renderList(); };
-                li.append(edit, del);
-                actionList.append(li);
-            }
-        });
-    }
-
-    function clearPanel() {
-      editIndex = -1;
-      panelTitle.textContent = 'New Action';
-      if (subSelect.options.length) subSelect.selectedIndex = 0;
-	  if (locationSelect.options.length) locationSelect.selectedIndex = 0;
-      nameInput.value = ''; condsContainer.innerHTML = ''; resContainer.innerHTML = '';
-    }
-
-	function loadAction(i) {
-  editIndex = i;
-  panelTitle.textContent = `Edit Action ${i}`;
-  const a = actions[i];
-  subSelect.value = a.subcategory;
-  locationSelect.value = a.location || 'inventory';
-  nameInput.value = a.name;
-  condsContainer.innerHTML = '';
-  resContainer.innerHTML = '';
-
-  if (a.conditions && Array.isArray(a.conditions)) {
-    a.conditions.forEach(cond => {
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      const conditionInput = createConditionInput(conditionTypes, cond);
-      row.appendChild(conditionInput);
-      
-      const del = document.createElement('button');
-      del.textContent = '×';
-      del.onclick = () => row.remove();
-      row.appendChild(del);
-      
-      condsContainer.appendChild(row);
-    });
-  }
-
-  if (a.results && Array.isArray(a.results)) {
-    a.results.forEach(res => {
-      addRes();
-      const row = resContainer.lastElementChild;
-      const sel = row.querySelector('select');
-      const inputKey = row.querySelector('input:nth-of-type(1)');
-      const inputValue = row.querySelector('input:nth-of-type(2)');
-      const inputChance = row.querySelector('input[type="number"]');
-
-      const resType = Object.keys(res)[0];
-      sel.value = resType;
-      inputChance.value = res.chance !== undefined ? res.chance : 1.0;
-
-      let keyName = '';
-      let keyValue = '';
-
-      if (resType === 'ep_cost') {
-        keyValue = res.ep_cost;
-      } else if (resType === 'stat_increase') {
-        keyName = Object.keys(res.stat_increase)[0];
-        keyValue = res.stat_increase[keyName];
-      } else if (resType === 'add_item') {
-        keyName = res.add_item.item;
-        keyValue = res.add_item.count;
-      } else if (resType === 'set_flag') {
-        keyName = res.set_flag;
-        keyValue = '';
-      } else if (resType === 'message') {
-        keyValue = res.message;
-      }
-
-      const newKeyField = createKeyField(resType, keyName);
-      row.replaceChild(newKeyField, inputKey);
-      inputValue.value = keyValue;
-    });
-  }
-}
-
-
-    saveBtn.onclick = () => {
-      const sub = subSelect.value;
-	  const location = locationSelect.value;
-      const name = nameInput.value;
-      const conds = [...condsContainer.querySelectorAll('.item-row')].map(r => {
-        const t = r.querySelector('select').value;
-        const k = r.querySelector('input:nth-of-type(1)').value;
-        const v = r.querySelector('input:nth-of-type(2)').value;
-        if (t==='stat_min') return { stat_min: { [k]:+v } };
-        if (t==='has_item') return { has_item:k, count_min:+v };
-        if (t==='flag_true') return { flag_true:k };
-        if (t==='flag_false') return { flag_false:k };
-        return { [t]: t === 'stat_min' ?  { [k]: +v } : t === 'has_item' ? k :  k };
-      });
-      const res = [...resContainer.querySelectorAll('.item-row')].map(r => {
-        const t = r.querySelector('select').value;
-        const k = r.querySelector('input:nth-of-type(1)').value;
-        const v = r.querySelector('input:nth-of-type(2)').value;
-        const chance = r.querySelector('input[type="number"]').value;
-        if (t === 'ep_cost') return { ep_cost: +v, chance: +chance };
-        if (t === 'stat_increase') return { stat_increase: { [k]: +v }, chance: +chance };
-        if (t === 'add_item') return { add_item: { item: k, count: +v }, chance: +chance };
-        if (t === 'set_flag') return { set_flag: k, chance: +chance };
-        if (t === 'message') return { message: v, chance: +chance };
-        return { [t]: t === 'ep_cost' ? +v : t === 'stat_increase' ? { [k]: +v } : t === 'add_item' ? { item: k, count: +v } : k , chance: +chance};
-      });
-      const obj = { subcategory:sub, location:location, name, conditions:conds, results:res }; //added location
-      editIndex<0 ? actions.push(obj) : actions[editIndex]=obj;
-      clearPanel(); renderList();
-    };
-
-    newBtn.onclick=clearPanel;
-
-    fileInput.onchange = () => {
-      const f=fileInput.files[0]; if(!f) return;
-      loadedFilename=f.name;
-      const r=new FileReader();
-      r.onload=e=>{
-        try{actions=JSON.parse(e.target.result);}catch{alert('Invalid JSON');return;}
-        clearPanel(); renderList();
-      };
-      r.readAsText(f);
-    };
-
-    // Auto-load actions_list.json
-    window.onload = function() {
-        fetch('actions_list.json')  // Changed to actions_list.json
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch actions_list.json');
                 }
-                return response.json();
-            })
-            .then(data => {
-                actions = data;  // Assign the loaded data to the actions array
-                renderList();    // Render the list after loading
-                console.log('actions_list.json loaded successfully.');
-            })
-            .catch(error => {
-                console.error('Error loading actions_list.json:', error);
-                errorMessageElement.textContent = 'Failed to load actions. Please check the file and try again.';
-                errorMessageElement.style.display = 'block';
+                if (locationOptions.length === 0) {
+                    locationOptions = ['inventory', 'battle', 'world'];
+                }
+                initLocations();
 
+                // Load categories
+                const categoriesResponse = await fetch('action_categories.json');
+                if (categoriesResponse.ok) {
+                    const data = await categoriesResponse.json();
+                    catOptions = Array.isArray(data) ? data : Object.values(data).flat();
+                }
+                if (catOptions.length === 0) {
+                    catOptions = ['weapons', 'armor', 'mining', 'social', 'merchant', 'explore'];
+                }
+                initCategories();
+
+                // Load actions
+                const actionsResponse = await fetch('actions_list.json');
+                if (actionsResponse.ok) {
+                    actions = await actionsResponse.json();
+                    renderActionList();
+                }
+
+                // Initialize condition keys
+                await loadConditionKeys();
+            } catch (error) {
+                showError('Failed to initialize: ' + error.message);
+            }
+        }
+
+        function initLocations() {
+            locationSelect.innerHTML = '';
+            filterLocationSelect.innerHTML = '<option value="">All Locations</option>';
+            
+            locationOptions.forEach(loc => {
+                locationSelect.add(new Option(loc, loc));
+                filterLocationSelect.add(new Option(loc, loc));
             });
-    };
+        }
 
-    filterLocationSelect.onchange = renderList;
-    addCondBtn.onclick=addCond;
-    addResBtn.onclick=addRes;
+        function initCategories() {
+            subSelect.innerHTML = '';
+            catOptions.forEach(cat => {
+                subSelect.add(new Option(cat, cat));
+            });
+        }
 
-    // Initialize conditions when the page loads
-    window.addEventListener('load', function() {
-        loadConditionKeys();
-    });
-  </script>
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function clearPanel() {
+            editIndex = -1;
+            panelTitle.textContent = 'New Action';
+            nameInput.value = '';
+            locationSelect.selectedIndex = 0;
+            subSelect.selectedIndex = 0;
+            condsContainer.innerHTML = '';
+            resContainer.innerHTML = '';
+        }
+
+        function addCondition() {
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            const conditionInput = createConditionInput(conditionTypes);
+            row.appendChild(conditionInput);
+            
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '×';
+            delBtn.className = 'delete';
+            delBtn.onclick = () => row.remove();
+            row.appendChild(delBtn);
+            
+            condsContainer.appendChild(row);
+        }
+
+        function addResult() {
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            
+            const typeSelect = document.createElement('select');
+            ['ep_cost', 'stat_increase', 'add_item', 'set_flag', 'message'].forEach(type => {
+                typeSelect.add(new Option(type, type));
+            });
+            
+            const keyInput = document.createElement('input');
+            keyInput.placeholder = 'Key';
+            
+            const valueInput = document.createElement('input');
+            valueInput.placeholder = 'Value';
+            
+            const chanceInput = document.createElement('input');
+            chanceInput.type = 'number';
+            chanceInput.placeholder = 'Chance';
+            chanceInput.min = '0';
+            chanceInput.max = '1';
+            chanceInput.step = '0.01';
+            chanceInput.value = '1';
+            
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '×';
+            delBtn.className = 'delete';
+            delBtn.onclick = () => row.remove();
+            
+            row.append(typeSelect, keyInput, valueInput, chanceInput, delBtn);
+            resContainer.appendChild(row);
+        }
+
+        function loadAction(index) {
+            const action = actions[index];
+            if (!action) return;
+
+            editIndex = index;
+            panelTitle.textContent = `Edit Action: ${action.name}`;
+            nameInput.value = action.name;
+            locationSelect.value = action.location || 'inventory';
+            subSelect.value = action.subcategory;
+
+            // Clear existing conditions and results
+            condsContainer.innerHTML = '';
+            resContainer.innerHTML = '';
+
+            // Load conditions
+            if (action.conditions) {
+                action.conditions.forEach(cond => {
+                    const row = document.createElement('div');
+                    row.className = 'item-row';
+                    
+                    // Create condition input with the correct data structure
+                    const conditionData = {
+                        type: cond.type,
+                        key: cond.key,
+                        value: cond.value
+                    };
+
+                    const conditionInput = createConditionInput(conditionTypes, conditionData);
+                    row.appendChild(conditionInput);
+                    
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = '×';
+                    delBtn.className = 'delete';
+                    delBtn.onclick = () => row.remove();
+                    row.appendChild(delBtn);
+                    
+                    condsContainer.appendChild(row);
+
+                    // Wait for the next tick to ensure the select elements are populated
+                    setTimeout(() => {
+                        const typeSelect = row.querySelector('.condition-type');
+                        const keySelect = row.querySelector('.condition-key');
+                        const valueInput = row.querySelector('.condition-value');
+
+                        if (typeSelect && keySelect && valueInput) {
+                            // Set the type first
+                            typeSelect.value = cond.type;
+                            const typeEvent = new Event('change');
+                            typeSelect.dispatchEvent(typeEvent);
+
+                            // Wait for the key options to be populated
+                            setTimeout(() => {
+                                // Set the key
+                                keySelect.value = cond.key;
+                                const keyEvent = new Event('change');
+                                keySelect.dispatchEvent(keyEvent);
+
+                                // Set the value
+                                if (valueInput.tagName === 'SELECT') {
+                                    valueInput.value = cond.value.toString();
+                                } else {
+                                    valueInput.value = cond.value;
+                                }
+                            }, 100);
+                        }
+                    }, 0);
+                });
+            }
+
+            // Load results
+            if (action.results) {
+                action.results.forEach(res => {
+                    const row = document.createElement('div');
+                    row.className = 'item-row';
+                    
+                    const typeSelect = document.createElement('select');
+                    ['ep_cost', 'stat_increase', 'add_item', 'set_flag', 'message'].forEach(type => {
+                        typeSelect.add(new Option(type, type));
+                    });
+                    
+                    const keyInput = document.createElement('input');
+                    keyInput.placeholder = 'Key';
+                    
+                    const valueInput = document.createElement('input');
+                    valueInput.placeholder = 'Value';
+                    
+                    const chanceInput = document.createElement('input');
+                    chanceInput.type = 'number';
+                    chanceInput.placeholder = 'Chance';
+                    chanceInput.min = '0';
+                    chanceInput.max = '1';
+                    chanceInput.step = '0.01';
+                    
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = '×';
+                    delBtn.className = 'delete';
+                    delBtn.onclick = () => row.remove();
+                    
+                    // Set values
+                    const resType = Object.keys(res)[0];
+                    typeSelect.value = resType;
+                    chanceInput.value = res.chance || 1;
+
+                    if (resType === 'ep_cost') {
+                        valueInput.value = res.ep_cost;
+                    } else if (resType === 'stat_increase') {
+                        keyInput.value = Object.keys(res.stat_increase)[0];
+                        valueInput.value = Object.values(res.stat_increase)[0];
+                    } else if (resType === 'add_item') {
+                        keyInput.value = res.add_item.item;
+                        valueInput.value = res.add_item.count;
+                    } else if (resType === 'set_flag') {
+                        keyInput.value = res.set_flag;
+                    } else if (resType === 'message') {
+                        valueInput.value = res.message;
+                    }
+                    
+                    row.append(typeSelect, keyInput, valueInput, chanceInput, delBtn);
+                    resContainer.appendChild(row);
+                });
+            }
+        }
+
+        function saveAction() {
+            const name = nameInput.value.trim();
+            if (!name) {
+                showError('Please enter an action name');
+                return;
+            }
+
+            // Collect conditions
+            const conditions = [...condsContainer.querySelectorAll('.item-row')].map(row => {
+                const typeSelect = row.querySelector('.condition-type');
+                const keySelect = row.querySelector('.condition-key');
+                const valueInput = row.querySelector('.condition-value');
+                
+                if (!typeSelect || !keySelect || !valueInput) return null;
+                
+                const type = typeSelect.value;
+                const key = keySelect.value;
+                let value = valueInput.value;
+                
+                if (!type || !key) return null;
+                
+                // Convert value to appropriate type
+                if (valueInput.type === 'number') {
+                    value = Number(value);
+                } else if (value === 'true') {
+                    value = true;
+                } else if (value === 'false') {
+                    value = false;
+                }
+
+                // Create condition object with the correct structure
+                return {
+                    type: type,
+                    key: key,
+                    value: value
+                };
+            }).filter(c => c !== null);
+
+            // Collect results
+            const results = [...resContainer.querySelectorAll('.item-row')].map(row => {
+                const typeSelect = row.querySelector('select');
+                const keyInput = row.querySelector('input:nth-of-type(1)');
+                const valueInput = row.querySelector('input:nth-of-type(2)');
+                const chanceInput = row.querySelector('input[type="number"]');
+                
+                if (!typeSelect || !valueInput) return null;
+                
+                const type = typeSelect.value;
+                const value = valueInput.value;
+                const chance = parseFloat(chanceInput.value) || 1;
+                
+                if (!type) return null;
+                
+                if (type === 'ep_cost') return { ep_cost: +value, chance };
+                if (type === 'stat_increase') return { stat_increase: { [keyInput.value]: +value }, chance };
+                if (type === 'add_item') return { add_item: { item: keyInput.value, count: +value }, chance };
+                if (type === 'set_flag') return { set_flag: keyInput.value, chance };
+                if (type === 'message') return { message: value, chance };
+                return null;
+            }).filter(r => r !== null);
+
+            const action = {
+                name,
+                location: locationSelect.value,
+                subcategory: subSelect.value,
+                conditions,
+                results
+            };
+
+            if (editIndex < 0) {
+                actions.push(action);
+            } else {
+                actions[editIndex] = action;
+            }
+
+            clearPanel();
+            renderActionList();
+        }
+
+        function renderActionList() {
+            const selectedLocation = filterLocationSelect.value;
+            actionList.innerHTML = '';
+            
+            actions.forEach((action, index) => {
+                if (!selectedLocation || action.location === selectedLocation) {
+                    const li = document.createElement('li');
+                    li.textContent = `[${action.subcategory} - ${action.location}] ${action.name}`;
+                    
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = 'Edit';
+                    editBtn.onclick = () => loadAction(index);
+                    
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = 'Delete';
+                    delBtn.className = 'delete';
+                    delBtn.onclick = () => {
+                        actions.splice(index, 1);
+                        renderActionList();
+                    };
+                    
+                    li.append(editBtn, delBtn);
+                    actionList.appendChild(li);
+                }
+            });
+        }
+
+        function saveToFile() {
+            const jsonStr = JSON.stringify(actions, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'actions_list.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function loadFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    actions = JSON.parse(e.target.result);
+                    renderActionList();
+                    clearPanel();
+                } catch (error) {
+                    showError('Invalid JSON file');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Event Listeners
+        document.getElementById('newActionBtn').onclick = clearPanel;
+        document.getElementById('addCondBtn').onclick = addCondition;
+        document.getElementById('addResBtn').onclick = addResult;
+        document.getElementById('saveBtn').onclick = saveAction;
+        document.getElementById('saveFileBtn').onclick = saveToFile;
+        document.getElementById('loadFileBtn').onclick = () => document.getElementById('fileInput').click();
+        document.getElementById('fileInput').onchange = loadFromFile;
+        filterLocationSelect.onchange = renderActionList;
+
+        // Initialize the application
+        initialize();
+    </script>
 </body>
 </html>

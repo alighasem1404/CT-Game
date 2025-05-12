@@ -6,9 +6,9 @@
     "conditions": [
       { "type": "item_count", "key": "IronPlate", "value": 2 }
     ],
+    
     "results": [
       { "ep_cost": 30, "chance": 1.0 },
-      { "stat_increase": { "crafting": 4 }, "chance": 1.0 },
       { "stat_increase": { "dexterity": 3 }, "chance": 1.0 },
       { "add_item": { "item": "IronGauntlets", "count": 1 }, "chance": 1.0 },
       { "message": "You forged a pair of iron gauntlets.", "chance": 1.0 }
@@ -25,7 +25,6 @@
     "results": [
       { "ep_cost": 25, "chance": 1.0 },
       { "stat_increase": { "strength": 4 }, "chance": 1.0 },
-      { "stat_increase": { "endurance": 5 }, "chance": 1.0 },
       { "stat_increase": { "dexterity": 2 }, "chance": 1.0 },
       { "add_item": { "item": "IronOre", "count": 12 }, "chance": 1.0 },
       { "add_item": { "item": "RareGem", "count": 1 }, "chance": 1.0 },
